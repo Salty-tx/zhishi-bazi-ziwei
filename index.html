@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f0e8" />
+    <title>知时·命理与东方健康</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="知时首页">
+        <span class="brand-mark">时</span>
+        <span>
+          <strong>知时</strong>
+          <small>ORIENTAL RHYTHM</small>
+        </span>
+      </a>
+      <nav class="header-nav" aria-label="主导航">
+        <a href="#reading">命理洞察</a>
+        <a href="#health">时辰养生</a>
+        <a href="#method">方法与边界</a>
+      </nav>
+      <span class="privacy-pill"><i></i> 本地计算·数据不上传</span>
+    </header>
+
+    <main id="top">
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> 观时·知己·顺势而养</p>
+          <h1>在天地节律中，<br /><em>读懂自己</em></h1>
+          <p class="hero-intro">
+            融合八字、紫微十二宫与中医时间观，将古老的观察方法转化为更温和、可理解的日常参考。
+          </p>
+          <div class="hero-notes">
+            <span><b>01</b> 四柱五行</span>
+            <span><b>02</b> 紫微宫位</span>
+            <span><b>03</b> 时辰养生</span>
+          </div>
+        </div>
+
+        <form class="birth-card" id="birth-form">
+          <div class="card-heading">
+            <div>
+              <p class="kicker">开启个人观测</p>
+              <h2>出生信息</h2>
+            </div>
+            <span class="seal">知<br />命</span>
+          </div>
+
+          <label>
+            <span>称呼 <small>选填</small></span>
+            <input id="name" type="text" maxlength="20" placeholder="如：青和" />
+          </label>
+
+          <div class="field-row">
+            <label>
+              <span>公历出生日期</span>
+              <input id="birth-date" type="date" min="1901-01-01" max="2099-12-31" required />
+            </label>
+            <label>
+              <span>出生时间</span>
+              <input id="birth-time" type="time" value="12:00" required />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label>
+              <span>生理性别</span>
+              <select id="gender">
+                <option value="female">女</option>
+                <option value="male">男</option>
+                <option value="unspecified">不选择</option>
+              </select>
+            </label>
+            <label>
+              <span>出生地</span>
+              <input id="location" type="text" value="中国·上海" placeholder="城市" />
+            </label>
+          </div>
+
+          <details class="advanced">
+            <summary>高级时间校正</summary>
+            <div class="advanced-grid">
+              <label>
+                <span>出生地经度 <small>选填</small></span>
+                <input id="longitude" type="number" min="-180" max="180" step="0.01" placeholder="上海 121.47" />
+              </label>
+              <label>
+                <span>时区</span>
+                <select id="timezone">
+                  <option value="8">UTC+8 中国标准时间</option>
+                  <option value="9">UTC+9</option>
+                  <option value="7">UTC+7</option>
+                  <option value="0">UTC+0</option>
+                  <option value="-5">UTC-5</option>
+                  <option value="-8">UTC-8</option>
+                </select>
+              </label>
+            </div>
+            <label class="check-line">
+              <input id="solar-correction" type="checkbox" />
+              <span>按经度进行地方平太阳时校正</span>
+            </label>
+          </details>
+
+          <label class="consent-line">
+            <input id="consent" type="checkbox" required />
+            <span>我理解结果仅供传统文化与健康教育参考，不构成医疗诊断。</span>
+          </label>
+
+          <button class="primary-button" type="submit">
+            <span>生成我的时辰报告</span>
+            <b>→</b>
+          </button>
+          <p class="form-hint" id="form-hint">建议使用出生证明上的准确时间</p>
+        </form>
+      </section>
+
+      <section class="trust-strip">
+        <span>传统历法模型</span>
+        <i></i>
+        <span>无宿命化论断</span>
+        <i></i>
+        <span>医疗风险分级</span>
+        <i></i>
+        <span>隐私优先</span>
+      </section>
+
+      <section class="report shell" id="reading" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span></span> PERSONAL RHYTHM REPORT</p>
+            <h2><span id="report-name">你</span>的时辰报告</h2>
+          </div>
+          <button class="ghost-button" id="edit-profile" type="button">修改资料</button>
+        </div>
+
+        <div class="report-nav" role="tablist">
+          <button class="active" data-target="bazi-panel" type="button">八字五行</button>
+          <button data-target="luck-panel" type="button">大运流年</button>
+          <button data-target="ziwei-panel" type="button">紫微十二宫</button>
+          <button data-target="health-panel" type="button">时辰养生</button>
+        </div>
+
+        <div class="report-panel active" id="bazi-panel">
+          <div class="panel-grid">
+            <article class="chart-card">
+              <div class="subheading">
+                <div><span>BA ZI</span><h3>四柱命盘</h3></div>
+                <p id="solar-time-note">标准时间排盘</p>
+              </div>
+              <div class="pillars" id="pillars"></div>
+              <p class="fine-print">年柱与月柱以节气分界。距节气交接日 24 小时内出生者，建议使用专业万年历复核交节时刻。23:00–00:00 的换日规则存在流派差异，本版按公历 00:00 换日。
+              </p>
+            </article>
+
+            <article class="element-card">
+              <div class="subheading">
+                <div><span>FIVE PHASES</span><h3>五行分布</h3></div>
+              </div>
+              <div class="element-orbit" id="element-orbit"></div>
+              <div class="element-bars" id="element-bars"></div>
+              <p class="insight" id="element-insight"></p>
+            </article>
+          </div>
+
+          <div class="reading-grid" id="element-readings"></div>
+
+          <section class="deep-reading">
+            <div class="deep-heading">
+              <div>
+                <span class="chapter">CHART INTERPRETATION</span>
+                <h3>命局深读</h3>
+              </div>
+              <p>结合月令、藏干权重与十神结构的简化分析</p>
+            </div>
+            <div class="chart-summary" id="chart-summary"></div>
+            <div class="ten-god-section">
+              <div class="ten-god-title">
+                <h4>十神线索</h4>
+                <p>十神表达与日主的相对关系，不代表人格好坏。</p>
+              </div>
+              <div class="ten-god-grid" id="ten-god-grid"></div>
+            </div>
+            <div class="narrative-grid" id="chart-deep-readings"></div>
+            <p class="analysis-boundary">强弱与平衡方向是离线简化模型，不等同于专业命理中的格局、调候或喜用神结论。</p>
+          </section>
+        </div>
+
+        <div class="report-panel" id="luck-panel">
+          <div class="luck-intro">
+            <div>
+              <span class="chapter">DECADE RHYTHM</span>
+              <h3>大运·十年阶段</h3>
+              <p>大运用于观察不同十年的环境主题。它不会单独决定事件，也不代表某个阶段必然好或坏。</p>
+            </div>
+            <div class="luck-method">
+              <div><small>排运方向</small><strong id="luck-direction">—</strong></div>
+              <div><small>估算起运</small><strong id="luck-start-age">—</strong></div>
+              <p id="luck-method-note"></p>
+            </div>
+          </div>
+
+          <div class="luck-cycles" id="luck-cycles"></div>
+          <p class="fine-print luck-disclaimer">起运岁数以相邻“节”的近似公历日期计算，按三天折一岁。交节时刻、真太阳时与流派规则可造成数月误差，不宜用于精确择日。</p>
+
+          <section class="annual-section">
+            <div class="annual-heading">
+              <div>
+                <span class="chapter">ANNUAL RHYTHM</span>
+                <h3>流年·年度主题</h3>
+              </div>
+              <label>
+                <span>选择年份</span>
+                <select id="annual-year-select"></select>
+              </label>
+            </div>
+            <div class="annual-years" id="annual-years"></div>
+            <div class="annual-detail">
+              <div class="annual-pillar" id="annual-pillar"></div>
+              <div class="annual-copy">
+                <span id="annual-cycle-label"></span>
+                <h4 id="annual-theme"></h4>
+                <p id="annual-reading"></p>
+              </div>
+              <div class="interaction-list" id="annual-interactions"></div>
+            </div>
+            <p class="analysis-boundary">流年合冲表示不同元素的交互线索，不是对婚恋、财富、健康或灾祸的事件预测。</p>
+          </section>
+        </div>
+
+        <div class="report-panel" id="ziwei-panel">
+          <div class="ziwei-layout">
+            <article class="palace-card">
+              <div class="subheading">
+                <div><span>ZI WEI DOU SHU</span><h3>十二宫基础盘</h3></div>
+                <p id="lunar-label"></p>
+              </div>
+              <div class="palace-grid" id="palace-grid"></div>
+            </article>
+            <aside class="explain-card">
+              <span class="chapter">CHAPTER 02</span>
+              <h3>命宫与身宫</h3>
+              <div class="big-palaces">
+                <div><small>命宫</small><strong id="life-palace">—</strong></div>
+                <div><small>身宫</small><strong id="body-palace">—</strong></div>
+              </div>
+              <p id="palace-reading"></p>
+              <div class="scope-note">
+                <b>当前版本范围</b>
+                <p>已计算农历月日、命宫、身宫及十二宫位。紫微主星、四化、大限与流年未纳入；“大运流年”页属于八字体系。</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="report-panel" id="health-panel">
+          <div class="safety-banner">
+            <span>!</span>
+            <div>
+              <b>健康内容不是疾病预测</b>
+              <p>五行与脏腑的对应属于中医传统理论，不能由出生时间推断你将患何种疾病。</p>
+            </div>
+          </div>
+          <div class="health-grid" id="health">
+            <article class="clock-card">
+              <div class="subheading">
+                <div><span>BODY CLOCK</span><h3>子午流注·当前时辰</h3></div>
+                <span class="live-dot">LIVE</span>
+              </div>
+              <div class="current-hour">
+                <span id="current-branch">—</span>
+                <div><strong id="current-organ">—</strong><small id="current-range">—</small></div>
+              </div>
+              <p id="current-advice"></p>
+              <div class="hour-track" id="hour-track"></div>
+            </article>
+            <article class="yunqi-card">
+              <div class="subheading">
+                <div><span>ANNUAL QI</span><h3>五运六气·<span id="current-year"></span></h3></div>
+              </div>
+              <div class="qi-pair">
+                <div><small>岁运</small><strong id="annual-movement"></strong></div>
+                <div><small>司天</small><strong id="heaven-qi"></strong></div>
+              </div>
+              <p id="annual-advice"></p>
+              <div class="plain-note">气候与个人感受受地域、季节和实际天气影响，年运只作宏观的传统观察框架。</div>
+            </article>
+          </div>
+
+          <div class="wellness-card">
+            <div>
+              <span class="chapter">LOW-RISK WELLNESS</span>
+              <h3>今日温和调养建议</h3>
+              <p>以规律作息、适度运动和均衡饮食为主，不根据命盘推荐药物或针灸处方。</p>
+            </div>
+            <div class="wellness-list" id="wellness-list"></div>
+          </div>
+
+          <div class="red-flags">
+            <h3>这些情况请优先就医</h3>
+            <p>持续或加重的胸痛、呼吸困难、突发无力/言语不清、晕厥、高热不退、严重过敏、剧烈腹痛或自伤念头，请及时拨打 120 或前往急诊。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="method shell" id="method">
+        <div>
+          <p class="eyebrow"><span></span> RESPONSIBLE TRADITION</p>
+          <h2>尊重传统，也尊重证据</h2>
+        </div>
+        <div class="method-grid">
+          <article><b>01</b><h3>历法透明</h3><p>展示采用的时间和计算边界，对交节附近的结果主动提示复核。</p></article>
+          <article><b>02</b><h3>不制造恐惧</h3><p>不用命理断言疾病、灾祸或寿命，不以“化解”之名制造付费焦虑。</p></article>
+          <article><b>03</b><h3>医疗安全</h3><p>只提供低风险生活方式教育，不替代医师、检查、处方或紧急救助。</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="brand footer-brand"><span class="brand-mark">时</span><span><strong>知时</strong><small>ORIENTAL RHYTHM</small></span></div>
+      <p>传统文化体验产品 · 不构成医疗、心理、法律或投资建议</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
