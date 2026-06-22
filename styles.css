@@ -159,6 +159,32 @@ input:focus, select:focus { border-color: rgba(30,91,75,.55); box-shadow: 0 0 0 
 .narrative-item p { margin: 9px 0 0; color: var(--muted); font-size: 11px; line-height: 1.85; }
 .analysis-boundary { margin: 22px 0 0; padding: 13px 15px; color: #8b8d87; background: rgba(177,138,69,.07); border-left: 2px solid var(--gold); font-size: 10px; line-height: 1.7; }
 .pillar .god-label { display: block; margin: 8px auto 0; color: var(--red); font-size: 9px; }
+.five-senses-section { margin-top: 30px; padding-top: 28px; border-top: 1px solid var(--line); }
+.five-senses-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.five-senses-heading h4 { margin: 8px 0 0; font: 500 23px var(--serif); }
+.five-senses-heading > p { max-width: 390px; margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
+.sense-recommendation { display: grid; grid-template-columns: 78px 1fr; gap: 18px; align-items: center; margin: 22px 0 16px; padding: 18px 20px; color: #f7f2e9; background: var(--jade-dark); border-radius: 3px 16px 3px 16px; }
+.sense-symbol { width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; font: 500 30px var(--serif); }
+.sense-recommendation small, .sense-recommendation strong, .sense-recommendation span { display: block; }
+.sense-recommendation small { color: #d7b879; font-size: 9px; letter-spacing: .13em; }
+.sense-recommendation strong { margin: 5px 0; font: 500 19px var(--serif); }
+.sense-recommendation span { color: rgba(255,255,255,.62); font-size: 10px; line-height: 1.7; }
+.five-sense-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.sense-card { min-width: 0; padding: 16px 13px; border: 1px solid var(--line); background: #f1ece2; position: relative; overflow: hidden; }
+.sense-card::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 4px; background: var(--phase-color); }
+.sense-card.recommended { box-shadow: inset 0 0 0 1px var(--phase-color); }
+.sense-card .recommend-mark { position: absolute; right: 8px; top: 10px; color: var(--red); font-size: 8px; }
+.sense-card > small { color: var(--muted); font-size: 9px; }
+.sense-card > strong { display: block; margin: 7px 0 11px; font: 500 22px var(--serif); }
+.sense-triplet { display: grid; gap: 6px; }
+.sense-triplet span { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; }
+.sense-triplet b { color: var(--ink); font: 500 13px var(--serif); }
+.tone-button { width: 100%; height: 34px; margin-top: 13px; border: 1px solid rgba(30,91,75,.28); color: var(--jade); background: transparent; cursor: pointer; transition: .2s; }
+.tone-button:hover, .tone-button.playing { color: #fff; background: var(--jade); border-color: var(--jade); }
+.tone-button.playing { animation: tone-pulse 1.4s ease-in-out infinite; }
+@keyframes tone-pulse { 50% { box-shadow: 0 0 0 5px rgba(30,91,75,.08); } }
+.audio-status { margin-top: 12px; color: var(--jade); font-size: 10px; text-align: center; min-height: 16px; }
+.taste-boundary { margin: 10px 0 0; color: #8b8d87; font-size: 9px; line-height: 1.7; text-align: center; }
 
 .luck-intro { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; padding: 30px; background: var(--jade-dark); color: #f7f2e9; border-radius: 5px 24px 5px 24px; }
 .luck-intro > div:first-child > p { max-width: 620px; color: rgba(255,255,255,.64); font-size: 11px; line-height: 1.8; }
@@ -297,6 +323,11 @@ footer p { font-size: 10px; }
   .chart-summary { grid-template-columns: 1fr; }
   .ten-god-grid { grid-template-columns: 1fr 1fr; }
   .narrative-grid { grid-template-columns: 1fr; }
+  .five-senses-heading { align-items: flex-start; flex-direction: column; }
+  .five-senses-heading > p { text-align: left; }
+  .five-sense-grid { grid-template-columns: 1fr 1fr; }
+  .sense-recommendation { grid-template-columns: 58px 1fr; }
+  .sense-symbol { width: 52px; height: 52px; font-size: 24px; }
   .pillars { gap: 5px; }
   .pillar { min-height: 165px; padding-inline: 4px; }
   .pillar strong { font-size: 32px; }

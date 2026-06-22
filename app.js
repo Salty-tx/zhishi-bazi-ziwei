@@ -33,6 +33,14 @@ const elementCopy = {
   "水": { nature: "储藏与滋养", organ: "肾、膀胱（传统对应）", care: "保证睡眠和适量饮水，久坐后起身活动，避免盲目进补。" }
 };
 
+const phaseSenses = {
+  "木": { color: "青", taste: "酸", tone: "角", solfege: "mi", hex: "#4f795b", sequence: [329.63, 392, 440, 523.25, 659.25, 523.25, 440, 392, 329.63] },
+  "火": { color: "赤", taste: "苦", tone: "徵", solfege: "sol", hex: "#a54c3e", sequence: [392, 440, 523.25, 659.25, 783.99, 659.25, 523.25, 440, 392] },
+  "土": { color: "黄", taste: "甘", tone: "宫", solfege: "do", hex: "#b18a45", sequence: [261.63, 293.66, 329.63, 392, 523.25, 392, 329.63, 293.66, 261.63] },
+  "金": { color: "白", taste: "辛", tone: "商", solfege: "re", hex: "#a6a398", sequence: [293.66, 329.63, 392, 440, 587.33, 440, 392, 329.63, 293.66] },
+  "水": { color: "黑", taste: "咸", tone: "羽", solfege: "la", hex: "#3c6575", sequence: [220, 261.63, 293.66, 329.63, 440, 392, 329.63, 261.63, 220] }
+};
+
 const organClock = [
   { branch: "子", organ: "胆经", range: "23:00–01:00", advice: "尽量进入稳定睡眠，让光线和信息刺激逐渐减少。" },
   { branch: "丑", organ: "肝经", range: "01:00–03:00", advice: "传统养生强调深度休息，不需要特意醒来做任何调理。" },
@@ -276,6 +284,119 @@ function renderChartAnalysis(result) {
     <article class="narrative-item"><b>十神聚焦·${dominantGods.join("与")}</b><p>${dominantReading}</p></article>
     <article class="narrative-item"><b>平衡方向·${analysis.balanceElements.join("与")}</b><p>${analysis.balanceCopy}这是观察方向，不作为穿衣、起名、投资或治疗依据。</p></article>`;
   return analysis;
+}
+
+let fiveToneAudioContext = null;
+let activeTonePlayback = null;
+
+function stopFiveToneMusic() {
+  if (!activeTonePlayback) return;
+  activeTonePlayback.nodes.forEach(node => {
+    try { node.stop(); } catch { /* The note may have already ended. */ }
+  });
+  clearTimeout(activeTonePlayback.timer);
+  activeTonePlayback.button.classList.remove("playing");
+  activeTonePlayback.button.setAttribute("aria-pressed", "false");
+  activeTonePlayback.button.textContent = "循环播放";
+  activeTonePlayback = null;
+}
+
+function getFiveTonePhrase(phase, round) {
+  const base = phase.sequence;
+  if (round % 3 === 0) return [...base, ...base.slice(1, -1).reverse(), ...base.slice(0, 5)];
+  if (round % 3 === 1) return [...base.slice(0, 5), ...base.slice(2), ...base.slice().reverse()];
+  return [...base.slice().reverse(), ...base.slice(1), ...base.slice(3, 8)];
+}
+
+function scheduleFiveTonePhrase(playback) {
+  if (activeTonePlayback !== playback) return;
+  const { element, phase } = playback;
+  const sequence = getFiveTonePhrase(phase, playback.round);
+  const noteLength = 0.68;
+  const startAt = fiveToneAudioContext.currentTime + 0.08;
+  const nodes = [];
+  sequence.forEach((frequency, index) => {
+    const noteStart = startAt + index * noteLength;
+    const oscillator = fiveToneAudioContext.createOscillator();
+    const overtone = fiveToneAudioContext.createOscillator();
+    const gain = fiveToneAudioContext.createGain();
+    const overtoneGain = fiveToneAudioContext.createGain();
+    oscillator.type = element === "水" ? "sine" : "triangle";
+    overtone.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, noteStart);
+    overtone.frequency.setValueAtTime(frequency * 2, noteStart);
+    gain.gain.setValueAtTime(0.0001, noteStart);
+    gain.gain.exponentialRampToValueAtTime(0.15, noteStart + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + noteLength * 0.94);
+    overtoneGain.gain.setValueAtTime(0.0001, noteStart);
+    overtoneGain.gain.exponentialRampToValueAtTime(0.022, noteStart + 0.1);
+    overtoneGain.gain.exponentialRampToValueAtTime(0.0001, noteStart + noteLength * 0.86);
+    oscillator.connect(gain).connect(fiveToneAudioContext.destination);
+    overtone.connect(overtoneGain).connect(fiveToneAudioContext.destination);
+    oscillator.start(noteStart);
+    overtone.start(noteStart);
+    oscillator.stop(noteStart + noteLength);
+    overtone.stop(noteStart + noteLength);
+    nodes.push(oscillator, overtone);
+  });
+  playback.nodes = nodes;
+  document.querySelector("#audio-status").textContent = `循环播放中：${element}·${phase.tone}音（${phase.solfege}）·第 ${playback.round + 1} 段`;
+  playback.timer = setTimeout(() => {
+    if (activeTonePlayback !== playback) return;
+    playback.round += 1;
+    scheduleFiveTonePhrase(playback);
+  }, sequence.length * noteLength * 1000 + 80);
+}
+
+async function playFiveToneMusic(element, button) {
+  const status = document.querySelector("#audio-status");
+  if (activeTonePlayback?.element === element) {
+    stopFiveToneMusic();
+    status.textContent = "循环播放已停止，可选择其他五音旋律。";
+    return;
+  }
+  stopFiveToneMusic();
+  const AudioEngine = window.AudioContext || window.webkitAudioContext;
+  if (!AudioEngine) {
+    status.textContent = "当前浏览器不支持实时音频合成。";
+    return;
+  }
+  fiveToneAudioContext ||= new AudioEngine();
+  if (fiveToneAudioContext.state === "suspended") await fiveToneAudioContext.resume();
+
+  const phase = phaseSenses[element];
+  button.classList.add("playing");
+  button.setAttribute("aria-pressed", "true");
+  button.textContent = "停止循环";
+  const playback = { element, phase, button, nodes: [], timer: null, round: 0 };
+  activeTonePlayback = playback;
+  scheduleFiveTonePhrase(playback);
+}
+
+function renderFiveSenseRecommendations(analysis) {
+  stopFiveToneMusic();
+  const [primary, secondary] = analysis.balanceElements;
+  const primarySense = phaseSenses[primary];
+  const secondarySense = phaseSenses[secondary];
+  document.querySelector("#sense-recommendation").innerHTML = `
+    <div class="sense-symbol" style="color:${primarySense.hex}">${primary}</div>
+    <div><small>当前优先观察·${primary}，辅助·${secondary}</small>
+    <strong>${primarySense.color}色·${primarySense.tone}音，辅以${secondarySense.color}色·${secondarySense.tone}音</strong>
+    <span>可将${primarySense.color}色用于空间、界面或衣物的小面积点缀，并试听${primarySense.tone}音旋律。${primarySense.taste}为传统味觉意象，不代表需要额外摄入。</span></div>`;
+
+  const orderedElements = [primary, secondary, ...elements.filter(element => element !== primary && element !== secondary)];
+  document.querySelector("#five-sense-grid").innerHTML = orderedElements.map((element, index) => {
+    const sense = phaseSenses[element];
+    const mark = index === 0 ? "优先" : index === 1 ? "辅助" : "";
+    return `<article class="sense-card ${mark ? "recommended" : ""}" style="--phase-color:${sense.hex}">
+      ${mark ? `<span class="recommend-mark">${mark}</span>` : ""}<small>五行</small><strong>${element}</strong>
+      <div class="sense-triplet"><span>五色 <b>${sense.color}</b></span><span>五味 <b>${sense.taste}</b></span><span>五音 <b>${sense.tone}·${sense.solfege}</b></span></div>
+      <button class="tone-button" type="button" data-tone-element="${element}" aria-pressed="false">循环播放</button></article>`;
+  }).join("");
+  document.querySelectorAll(".tone-button").forEach(button => {
+    button.onclick = () => playFiveToneMusic(button.dataset.toneElement, button);
+  });
+  document.querySelector("#audio-status").textContent = `推荐先播放${primarySense.tone}音；每段约 15 秒，未点击停止前会持续循环。`;
 }
 
 function renderZiwei(year, month, day, hourBranch) {
@@ -545,6 +666,7 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
   renderPillars(result);
   const elementSummary = renderElements(result);
   const chartAnalysis = renderChartAnalysis(result);
+  renderFiveSenseRecommendations(chartAnalysis);
   const gender = document.querySelector("#gender").value;
   renderLuck(result, chartAnalysis, { year, month, day, hour, minute }, gender);
   renderZiwei(year, month, day, result.hourBranch);
