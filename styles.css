@@ -242,10 +242,34 @@ input:focus, select:focus { border-color: rgba(30,91,75,.55); box-shadow: 0 0 0 
 .big-palaces div { padding: 17px; text-align: center; background: #f1ece2; }
 .big-palaces small { display: block; color: var(--muted); font-size: 9px; }
 .big-palaces strong { display: block; margin-top: 5px; color: var(--red); font: 500 28px var(--serif); }
+.big-palaces em { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; font-style: normal; }
 .explain-card > p { color: var(--muted); font-size: 12px; line-height: 1.9; margin: 22px 0; }
+.ziwei-keynotes { display: grid; gap: 10px; margin: 0 0 18px; }
+.ziwei-keynotes article { padding: 14px 16px; border: 1px solid rgba(30,91,75,.13); background: rgba(255,255,255,.42); }
+.ziwei-keynotes small { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+.ziwei-keynotes strong { display: block; margin: 6px 0; color: var(--jade); font: 500 17px var(--serif); }
+.ziwei-keynotes p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
 .scope-note { padding: 16px; border-left: 2px solid var(--gold); background: rgba(177,138,69,.07); }
 .scope-note b { font-size: 11px; }
 .scope-note p { color: var(--muted); font-size: 10px; line-height: 1.7; margin: 6px 0 0; }
+.palace-detail-section { margin-top: 24px; }
+.section-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+.section-title span { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .2em; }
+.section-title h3 { margin: 8px 0 0; font: 500 26px var(--serif); }
+.section-title p { max-width: 470px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.8; text-align: right; }
+.palace-reading-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.palace-reading-card { position: relative; padding: 19px; border: 1px solid var(--line); border-radius: 4px 20px 4px 20px; background: rgba(255,253,248,.76); min-height: 236px; }
+.palace-reading-card.is-life { border-color: rgba(30,91,75,.38); box-shadow: inset 0 0 0 1px rgba(30,91,75,.16); }
+.palace-reading-card.is-body { border-color: rgba(158,63,50,.32); }
+.palace-card-head small { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.palace-card-head h4 { margin: 7px 0 12px; color: var(--ink); font: 500 22px var(--serif); }
+.palace-card-head h4 span { margin-left: 8px; color: var(--muted); font: 700 9px var(--sans); letter-spacing: .12em; }
+.focus-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.focus-tags span { padding: 3px 7px; color: var(--red); border: 1px solid rgba(158,63,50,.24); border-radius: 999px; font-size: 9px; font-weight: 800; }
+.palace-reading-card p { color: var(--muted); font-size: 11px; line-height: 1.8; margin: 0 0 13px; }
+.palace-axis { color: #6f665b; background: rgba(177,138,69,.08); padding: 10px 12px; font-size: 10px; line-height: 1.8; }
+.palace-axis b { color: var(--jade); margin-right: 7px; }
+.palace-reading-card em { display: block; margin-top: 12px; color: var(--red); font-size: 10px; font-style: normal; line-height: 1.6; }
 
 .safety-banner { display: flex; gap: 15px; padding: 18px 22px; color: #71433a; background: #efe2d7; border: 1px solid rgba(158,63,50,.17); margin-bottom: 20px; }
 .safety-banner > span { width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid var(--red); border-radius: 50%; }
@@ -297,6 +321,7 @@ footer p { font-size: 10px; }
   .hero-notes { justify-content: center; }
   .panel-grid, .ziwei-layout, .health-grid, .wellness-card, .luck-intro { grid-template-columns: 1fr; }
   .reading-grid { grid-template-columns: 1fr; }
+  .palace-reading-grid { grid-template-columns: 1fr 1fr; }
   .annual-detail { grid-template-columns: 100px 1fr; }
   .interaction-list { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
 }
@@ -320,6 +345,8 @@ footer p { font-size: 10px; }
   .deep-reading, .annual-section { padding: 22px 15px; }
   .deep-heading, .annual-heading, .ten-god-title { align-items: flex-start; flex-direction: column; }
   .deep-heading > p { text-align: left; }
+  .section-title { align-items: flex-start; flex-direction: column; }
+  .section-title p { text-align: left; }
   .chart-summary { grid-template-columns: 1fr; }
   .ten-god-grid { grid-template-columns: 1fr 1fr; }
   .narrative-grid { grid-template-columns: 1fr; }
@@ -335,6 +362,8 @@ footer p { font-size: 10px; }
   .palace { padding: 7px; }
   .palace b { font-size: 13px; }
   .palace.center strong { font-size: 24px; }
+  .palace-reading-grid { grid-template-columns: 1fr; }
+  .palace-reading-card { min-height: auto; }
   .hour-track { grid-template-columns: repeat(6, 1fr); }
   .annual-years { grid-template-columns: repeat(5, 1fr); }
   .annual-detail { grid-template-columns: 1fr; }

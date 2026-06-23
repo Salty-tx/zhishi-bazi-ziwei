@@ -61,6 +61,82 @@ const palacePositions = [
   [4,1], [3,1], [2,1], [1,1], [1,2], [1,3],
   [1,4], [2,4], [3,4], [4,4], [4,3], [4,2]
 ];
+const branchQualities = {
+  "子": "潜藏、流动、起念",
+  "丑": "蓄积、承载、耐心",
+  "寅": "发端、行动、开创",
+  "卯": "生发、协调、人缘",
+  "辰": "整合、转化、蓄势",
+  "巳": "辨明、表达、洞察",
+  "午": "显明、热度、担当",
+  "未": "沉淀、照顾、修整",
+  "申": "变通、规则、效率",
+  "酉": "审美、边界、精炼",
+  "戌": "守成、检视、责任",
+  "亥": "蓄养、想象、回归"
+};
+const palaceInterpretations = {
+  "命宫": {
+    topic: "自我气质",
+    reading: "观察一个人习惯如何认识自己、面对选择，以及外界最容易感受到的气质。这里强时，适合先梳理核心价值，再决定行动顺序。",
+    prompt: "把“我是谁”落到每天稳定的选择上。"
+  },
+  "兄弟": {
+    topic: "同辈协作",
+    reading: "观察手足、同辈、伙伴之间的互动方式，也可延伸为团队中的互助与边界。这里提醒你分清支持、竞争和责任归属。",
+    prompt: "合作前先说清资源、时间和期待。"
+  },
+  "夫妻": {
+    topic: "亲密关系",
+    reading: "观察亲密伴侣、长期契约与相处模式。它不等同婚姻结论，更适合用来反思沟通节奏、承诺方式和彼此空间。",
+    prompt: "关系里的稳定感，常来自可重复的沟通。"
+  },
+  "子女": {
+    topic: "延展创造",
+    reading: "观察子女缘、作品、创意延伸与照顾他人的方式。现代使用时，也可看作项目成果、培养后辈和长期输出的象。",
+    prompt: "把灵感变成可被照看、可被交付的成果。"
+  },
+  "财帛": {
+    topic: "资源经营",
+    reading: "观察收入、消费、资源调度和价值交换。它不是财富保证，而是提醒你看见自己如何取得、保存和使用资源。",
+    prompt: "让预算、节奏和价值判断一起工作。"
+  },
+  "疾厄": {
+    topic: "身心警讯",
+    reading: "传统上用于观察体质与隐忧；本应用只作健康教育提醒，不做疾病判断。可把它理解为压力、作息和风险管理的观察位。",
+    prompt: "不舒服先看现实指标，必要时及时就医。"
+  },
+  "迁移": {
+    topic: "外部舞台",
+    reading: "观察外出、环境变化、远方机会和公众场域。它也代表离开熟悉环境后，个人能力如何被放大或重新校准。",
+    prompt: "换环境前，先确认目标、资源和退路。"
+  },
+  "交友": {
+    topic: "人脉网络",
+    reading: "观察朋友、部属、社群和合作圈层。它提醒你辨别谁能同行、谁只适合短期协作，以及圈层对选择的影响。",
+    prompt: "人脉的质量，往往比数量更影响方向。"
+  },
+  "官禄": {
+    topic: "事业角色",
+    reading: "观察职业路径、职责、名声与长期成就。这里适合反思自己更适合规则清晰、专业深耕，还是弹性开创的舞台。",
+    prompt: "把能力放进能累积信用的位置。"
+  },
+  "田宅": {
+    topic: "居所根基",
+    reading: "观察家宅、不动产、居住环境与安全感来源。现代使用时，也可延伸为个人基地、工作空间和生活秩序。",
+    prompt: "空间会塑造习惯，先整理最常待的位置。"
+  },
+  "福德": {
+    topic: "精神余裕",
+    reading: "观察内在满足、休息能力、兴趣与精神滋养。这里不是享乐指标，而是提醒你是否有让心安顿下来的方法。",
+    prompt: "会休息的人，才更容易长期稳定。"
+  },
+  "父母": {
+    topic: "来源支持",
+    reading: "观察父母、长辈、师承、制度资源与早年背景。它可帮助你分辨哪些支持值得承接，哪些旧模式需要重新整理。",
+    prompt: "承接资源，也要更新自己的选择权。"
+  }
+};
 
 function mod(value, base) { return ((value % base) + base) % base; }
 
@@ -399,12 +475,45 @@ function renderFiveSenseRecommendations(analysis) {
   document.querySelector("#audio-status").textContent = `推荐先播放${primarySense.tone}音；每段约 15 秒，未点击停止前会持续循环。`;
 }
 
+function getPalaceAxis(name) {
+  const index = palaceNames.indexOf(name);
+  return {
+    triad: [name, palaceNames[mod(index + 4, 12)], palaceNames[mod(index + 8, 12)]],
+    opposite: palaceNames[mod(index + 6, 12)]
+  };
+}
+
+function renderPalaceCard(placement, lifeBranchIndex, bodyBranchIndex) {
+  const copy = palaceInterpretations[placement.name];
+  const axis = getPalaceAxis(placement.name);
+  const isLife = placement.branchIndex === lifeBranchIndex;
+  const isBody = placement.branchIndex === bodyBranchIndex;
+  const tags = [isLife ? "命宫定位" : "", isBody ? "身宫着力" : ""].filter(Boolean);
+  return `<article class="palace-reading-card ${isLife ? "is-life" : ""} ${isBody ? "is-body" : ""}">
+    <div class="palace-card-head">
+      <small>${placement.branch}宫 · ${branchQualities[placement.branch]}</small>
+      <h4>${placement.name}<span>${copy.topic}</span></h4>
+    </div>
+    ${tags.length ? `<div class="focus-tags">${tags.map(tag => `<span>${tag}</span>`).join("")}</div>` : ""}
+    <p>${copy.reading}</p>
+    <div class="palace-axis"><b>三方</b>${axis.triad.join(" / ")}<br><b>对宫</b>${axis.opposite}</div>
+    <em>${copy.prompt}</em>
+  </article>`;
+}
+
 function renderZiwei(year, month, day, hourBranch) {
   const lunar = getLunarDate(year, month, day);
   const lifeBranchIndex = mod(2 + lunar.month - 1 - hourBranch, 12);
   const bodyBranchIndex = mod(2 + lunar.month - 1 + hourBranch, 12);
   const branchToPalace = {};
   palaceNames.forEach((name, index) => { branchToPalace[mod(lifeBranchIndex - index, 12)] = name; });
+  const placements = palaceNames.map((name, index) => {
+    const branchIndex = mod(lifeBranchIndex - index, 12);
+    return { name, index, branchIndex, branch: branches[branchIndex] };
+  });
+  const palaceByName = Object.fromEntries(placements.map(placement => [placement.name, placement]));
+  const lifeAxis = getPalaceAxis("命宫");
+  const bodyPalaceName = branchToPalace[bodyBranchIndex];
 
   let html = `<div class="palace center"><div><strong>知时</strong><small>十二宫基础盘</small></div></div>`;
   palacePositions.forEach(([column, row], branchIndex) => {
@@ -418,7 +527,15 @@ function renderZiwei(year, month, day, hourBranch) {
   document.querySelector("#lunar-label").textContent = `农历 ${lunar.label}${lunar.isLeap ? "·闰月" : ""}`;
   document.querySelector("#life-palace").textContent = branches[lifeBranchIndex];
   document.querySelector("#body-palace").textContent = branches[bodyBranchIndex];
-  document.querySelector("#palace-reading").textContent = `命宫落${branches[lifeBranchIndex]}，身宫落${branches[bodyBranchIndex]}。在紫微体系中，命宫用于观察先天倾向，身宫用于观察后天着力点；它们是自我反思的角度，不是对人生的定论。`;
+  document.querySelector("#life-branch-note").textContent = branchQualities[branches[lifeBranchIndex]];
+  document.querySelector("#body-palace-name").textContent = bodyPalaceName;
+  document.querySelector("#palace-reading").textContent = `命宫落${branches[lifeBranchIndex]}，身宫落${branches[bodyBranchIndex]}，身宫所在十二宫为${bodyPalaceName}。命宫用于观察先天倾向，身宫用于观察后天着力点；请把它们当作自我反思的角度，不要当作人生定论。`;
+  document.querySelector("#ziwei-keynotes").innerHTML = [
+    { label: "命宫三方", value: lifeAxis.triad.join(" / "), note: `对宫为${lifeAxis.opposite}，用于观察自我、资源、事业与外部环境的连动。` },
+    { label: "身宫落点", value: `${bodyPalaceName} · ${branches[bodyBranchIndex]}宫`, note: palaceInterpretations[bodyPalaceName].prompt },
+    { label: "命宫支气", value: branchQualities[branches[lifeBranchIndex]], note: `命宫${palaceByName["命宫"].branch}宫提供本盘的起点气质。` }
+  ].map(item => `<article><small>${item.label}</small><strong>${item.value}</strong><p>${item.note}</p></article>`).join("");
+  document.querySelector("#palace-interpretations").innerHTML = placements.map(placement => renderPalaceCard(placement, lifeBranchIndex, bodyBranchIndex)).join("");
 }
 
 function getAdjacentJieDate(year, month, day, hour, minute, forward) {
