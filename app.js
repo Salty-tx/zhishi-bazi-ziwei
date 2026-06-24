@@ -12,6 +12,82 @@ const hiddenStems = [
 ];
 const elementCycle = ["木", "火", "土", "金", "水"];
 
+const trigrams = [
+  { number: 1, name: "乾", image: "天", element: "金", lines: [1, 1, 1], direction: "西北", quality: "刚健、开阔、决断" },
+  { number: 2, name: "兑", image: "泽", element: "金", lines: [1, 1, 0], direction: "西", quality: "表达、悦纳、协商" },
+  { number: 3, name: "离", image: "火", element: "火", lines: [1, 0, 1], direction: "南", quality: "照见、审美、分辨" },
+  { number: 4, name: "震", image: "雷", element: "木", lines: [1, 0, 0], direction: "东", quality: "启动、震发、行动" },
+  { number: 5, name: "巽", image: "风", element: "木", lines: [0, 1, 1], direction: "东南", quality: "渗透、沟通、渐进" },
+  { number: 6, name: "坎", image: "水", element: "水", lines: [0, 1, 0], direction: "北", quality: "风险、流动、智慧" },
+  { number: 7, name: "艮", image: "山", element: "土", lines: [0, 0, 1], direction: "东北", quality: "止息、边界、沉着" },
+  { number: 8, name: "坤", image: "地", element: "土", lines: [0, 0, 0], direction: "西南", quality: "承载、配合、滋养" }
+];
+const trigramByName = Object.fromEntries(trigrams.map(trigram => [trigram.name, trigram]));
+const trigramByLineKey = Object.fromEntries(trigrams.map(trigram => [trigram.lines.join(""), trigram]));
+const hexagramNames = {
+  "乾-乾": "乾为天", "乾-兑": "天泽履", "乾-离": "天火同人", "乾-震": "天雷无妄", "乾-巽": "天风姤", "乾-坎": "天水讼", "乾-艮": "天山遁", "乾-坤": "天地否",
+  "兑-乾": "泽天夬", "兑-兑": "兑为泽", "兑-离": "泽火革", "兑-震": "泽雷随", "兑-巽": "泽风大过", "兑-坎": "泽水困", "兑-艮": "泽山咸", "兑-坤": "泽地萃",
+  "离-乾": "火天大有", "离-兑": "火泽睽", "离-离": "离为火", "离-震": "火雷噬嗑", "离-巽": "火风鼎", "离-坎": "火水未济", "离-艮": "火山旅", "离-坤": "火地晋",
+  "震-乾": "雷天大壮", "震-兑": "雷泽归妹", "震-离": "雷火丰", "震-震": "震为雷", "震-巽": "雷风恒", "震-坎": "雷水解", "震-艮": "雷山小过", "震-坤": "雷地豫",
+  "巽-乾": "风天小畜", "巽-兑": "风泽中孚", "巽-离": "风火家人", "巽-震": "风雷益", "巽-巽": "巽为风", "巽-坎": "风水涣", "巽-艮": "风山渐", "巽-坤": "风地观",
+  "坎-乾": "水天需", "坎-兑": "水泽节", "坎-离": "水火既济", "坎-震": "水雷屯", "坎-巽": "水风井", "坎-坎": "坎为水", "坎-艮": "水山蹇", "坎-坤": "水地比",
+  "艮-乾": "山天大畜", "艮-兑": "山泽损", "艮-离": "山火贲", "艮-震": "山雷颐", "艮-巽": "山风蛊", "艮-坎": "山水蒙", "艮-艮": "艮为山", "艮-坤": "山地剥",
+  "坤-乾": "地天泰", "坤-兑": "地泽临", "坤-离": "地火明夷", "坤-震": "地雷复", "坤-巽": "地风升", "坤-坎": "地水师", "坤-艮": "地山谦", "坤-坤": "坤为地"
+};
+const trigramInsights = {
+  "乾": "先看目标、规则和主导权，适合把模糊愿望整理成明确承诺。",
+  "兑": "先看沟通、交换和情绪气氛，适合用更清楚的表达减少误会。",
+  "离": "先看信息、证据和可见度，适合把判断放到事实光线下检验。",
+  "震": "先看行动、启动和突发变化，适合把第一步做小并及时复盘。",
+  "巽": "先看渗透、协商和长期影响，适合用柔和但连续的方式推进。",
+  "坎": "先看风险、压力和未知水位，适合预留缓冲并确认真实约束。",
+  "艮": "先看停止、边界和节奏，适合先暂停消耗，再决定是否继续。",
+  "坤": "先看承载、资源和配合，适合稳住基本盘，避免独自硬扛。"
+};
+const lineLabels = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+const yaoStates = {
+  6: { name: "老阴", change: "变阳", moving: true },
+  7: { name: "少阳", change: "静爻", moving: false },
+  8: { name: "少阴", change: "静爻", moving: false },
+  9: { name: "老阳", change: "变阴", moving: true }
+};
+const sixSpirits = ["青龙", "朱雀", "勾陈", "腾蛇", "白虎", "玄武"];
+const sixKinCopy = {
+  "兄弟": "同类、伙伴、竞争与自我立场",
+  "子孙": "输出、结果、放松与消解压力",
+  "妻财": "资源、现实收益与可管理事项",
+  "官鬼": "规则、压力、责任与风险约束",
+  "父母": "文书、支持、学习与保护条件"
+};
+
+const qimenPalaces = [
+  { num: 4, name: "巽", direction: "东南", branch: "辰巳", element: "木" },
+  { num: 9, name: "离", direction: "南", branch: "午", element: "火" },
+  { num: 2, name: "坤", direction: "西南", branch: "未申", element: "土" },
+  { num: 3, name: "震", direction: "东", branch: "卯", element: "木" },
+  { num: 5, name: "中", direction: "中", branch: "中", element: "土" },
+  { num: 7, name: "兑", direction: "西", branch: "酉", element: "金" },
+  { num: 8, name: "艮", direction: "东北", branch: "丑寅", element: "土" },
+  { num: 1, name: "坎", direction: "北", branch: "子", element: "水" },
+  { num: 6, name: "乾", direction: "西北", branch: "戌亥", element: "金" }
+];
+const qimenFlow = [1, 8, 3, 4, 9, 2, 7, 6];
+const qimenDoors = ["休门", "生门", "伤门", "杜门", "景门", "死门", "惊门", "开门"];
+const qimenStars = ["天蓬", "天任", "天冲", "天辅", "天英", "天芮", "天柱", "天心", "天禽"];
+const qimenGods = ["值符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"];
+const qimenStems = ["戊", "己", "庚", "辛", "壬", "癸", "丁", "丙", "乙"];
+const qimenXunshou = ["甲子戊", "甲戌己", "甲申庚", "甲午辛", "甲辰壬", "甲寅癸"];
+const qimenDoorCopy = {
+  "休门": "利休整、沟通、学习和恢复秩序。",
+  "生门": "利增长、资源、经营和稳步推进。",
+  "伤门": "主动作、损耗与冲撞，宜控制成本。",
+  "杜门": "主隐藏、阻隔和保密，宜先做准备。",
+  "景门": "主展示、传播、文书和可见度。",
+  "死门": "主停滞、收束和旧事处理，宜保守。",
+  "惊门": "主消息、惊动和不确定，宜核实信息。",
+  "开门": "利开启、公开、谈判和执行。"
+};
+
 const tenGodCopy = {
   "比肩": { group: "自主", brief: "同类支持", reading: "关注自主性、同辈协作与边界。适合在保持主见的同时，为他人留出参与空间。" },
   "劫财": { group: "自主", brief: "竞合与行动", reading: "关注竞争、合作与资源分配。行动力可贵，重要决定前也要核对成本和共识。" },
@@ -538,6 +614,244 @@ function renderZiwei(year, month, day, hourBranch) {
   document.querySelector("#palace-interpretations").innerHTML = placements.map(placement => renderPalaceCard(placement, lifeBranchIndex, bodyBranchIndex)).join("");
 }
 
+function formatInputTime(birthData) {
+  return `${birthData.year}-${String(birthData.month).padStart(2, "0")}-${String(birthData.day).padStart(2, "0")} ${String(birthData.hour).padStart(2, "0")}:${String(birthData.minute).padStart(2, "0")}`;
+}
+
+function getDateTimeParts(date) {
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes()
+  };
+}
+
+function getTrigramFromLines(lines) {
+  return trigramByLineKey[lines.join("")] || trigrams[0];
+}
+
+function getHexagramFromLines(lines) {
+  const lower = getTrigramFromLines(lines.slice(0, 3));
+  const upper = getTrigramFromLines(lines.slice(3, 6));
+  return { upper, lower, lines, name: getHexagramName(upper, lower) };
+}
+
+function getHexagramName(upper, lower) {
+  return hexagramNames[`${upper.name}-${lower.name}`] || `${upper.image}${lower.image}卦`;
+}
+
+function renderHexagramLines(lines, movingLines = []) {
+  const movingSet = new Set(Array.isArray(movingLines) ? movingLines : [movingLines].filter(Boolean));
+  return Array.from({ length: 6 }, (_, index) => 6 - index).map(lineNumber => {
+    const isYang = lines[lineNumber - 1] === 1;
+    return `<div class="hex-line ${isYang ? "yang" : "yin"} ${movingSet.has(lineNumber) ? "moving" : ""}" aria-label="${lineLabels[lineNumber - 1]}${isYang ? "阳爻" : "阴爻"}">
+      <i></i><i></i>
+    </div>`;
+  }).join("");
+}
+
+function renderHexagramBlock(label, hexagram, movingLines = []) {
+  return `<article class="hexagram-block">
+    <small>${label}</small>
+    <strong>${hexagram.name}</strong>
+    <span>${hexagram.upper.image}上${hexagram.lower.image}下 · ${hexagram.upper.name}${hexagram.lower.name}</span>
+    <div class="hexagram-lines">${renderHexagramLines(hexagram.lines, movingLines)}</div>
+  </article>`;
+}
+
+function flipLines(lines, movingLines) {
+  const changed = [...lines];
+  movingLines.forEach(lineNumber => { changed[lineNumber - 1] = changed[lineNumber - 1] ? 0 : 1; });
+  return changed;
+}
+
+function getSixKin(dayElement, targetElement) {
+  const relation = mod(elementCycle.indexOf(targetElement) - elementCycle.indexOf(dayElement), 5);
+  if (relation === 0) return "兄弟";
+  if (relation === 1) return "子孙";
+  if (relation === 2) return "妻财";
+  if (relation === 3) return "官鬼";
+  return "父母";
+}
+
+function renderMiniYao(isYang) {
+  return `<span class="mini-yao ${isYang ? "yang" : "yin"}"><i></i><i></i></span>`;
+}
+
+function renderLiuyao(result, birthData, sourceLabel = "输入时间") {
+  const seed = birthData.year * 13 + birthData.month * 17 + birthData.day * 19 + birthData.hour * 23 + birthData.minute * 29 + result.dayStem * 31;
+  const lineValues = Array.from({ length: 6 }, (_, index) => {
+    const pillar = result.pillars[index % result.pillars.length];
+    const valueIndex = mod(seed + (index + 1) * birthData.day + pillar.stem * 7 + pillar.branch * 11, 4);
+    return [6, 7, 8, 9][valueIndex];
+  });
+  if (!lineValues.some(value => yaoStates[value].moving)) {
+    const forcedIndex = mod(seed, 6);
+    lineValues[forcedIndex] = lineValues[forcedIndex] % 2 === 1 ? 9 : 6;
+  }
+
+  const originalLines = lineValues.map(value => value % 2 === 1 ? 1 : 0);
+  const movingLines = lineValues.map((value, index) => yaoStates[value].moving ? index + 1 : 0).filter(Boolean);
+  const changedLines = flipLines(originalLines, movingLines);
+  const originalHexagram = getHexagramFromLines(originalLines);
+  const changedHexagram = getHexagramFromLines(changedLines);
+  const dayElement = stemElements[result.dayStem];
+  const worldLine = movingLines[0];
+  const responseLine = mod(worldLine + 2, 6) + 1;
+  const lineBranches = lineValues.map((_, index) => mod(result.pillars[1].branch + index * 2 + originalHexagram.upper.number + originalHexagram.lower.number, 12));
+  const lineKins = lineBranches.map(branchIndex => getSixKin(dayElement, branchElements[branchIndex]));
+  const focusKin = lineKins[worldLine - 1];
+
+  document.querySelector("#liuyao-seed").textContent = `${formatInputTime(birthData)} · ${sourceLabel} · 时间模拟摇卦`;
+  document.querySelector("#liuyao-original").innerHTML = renderHexagramBlock("本卦", originalHexagram, movingLines);
+  document.querySelector("#liuyao-changed").innerHTML = renderHexagramBlock("变卦", changedHexagram);
+  document.querySelector("#liuyao-lines").innerHTML = Array.from({ length: 6 }, (_, index) => 6 - index).map(lineNumber => {
+    const lineIndex = lineNumber - 1;
+    const value = lineValues[lineIndex];
+    const branchIndex = lineBranches[lineIndex];
+    const kin = lineKins[lineIndex];
+    const roles = [
+      lineNumber === worldLine ? "世" : "",
+      lineNumber === responseLine ? "应" : "",
+      yaoStates[value].moving ? "动" : ""
+    ].filter(Boolean);
+    return `<div class="yao-line ${yaoStates[value].moving ? "moving" : ""}">
+      ${renderMiniYao(originalLines[lineIndex] === 1)}
+      <b>${lineLabels[lineIndex]}</b>
+      <span>${sixSpirits[mod(lineIndex + result.dayStem, 6)]} · ${branches[branchIndex]}${branchElements[branchIndex]} · ${kin}</span>
+      <em>${roles.join(" / ") || "静"} · ${yaoStates[value].name}${yaoStates[value].moving ? yaoStates[value].change : ""}</em>
+    </div>`;
+  }).join("");
+
+  const movingSummary = movingLines.map(lineNumber => `${lineLabels[lineNumber - 1]}${yaoStates[lineValues[lineNumber - 1]].name}`).join("、");
+  document.querySelector("#liuyao-readings").innerHTML = [
+    { title: "卦象焦点", copy: `本卦为${originalHexagram.name}，变卦为${changedHexagram.name}。上卦${originalHexagram.upper.name}主${originalHexagram.upper.quality}，下卦${originalHexagram.lower.name}主${originalHexagram.lower.quality}。` },
+    { title: "动爻提示", copy: `${movingSummary}为本次时间卦的变化点。动爻越多，越适合先辨别问题边界，避免急于给单一结论。` },
+    { title: `用神观察·${focusKin}`, copy: `简化定位把${lineLabels[worldLine - 1]}视作焦点，六亲为${focusKin}，可联想到${sixKinCopy[focusKin]}；应位在${lineLabels[responseLine - 1]}，用于观察外部回应。` }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+}
+
+function getBodyUseRelation(bodyElement, useElement) {
+  const relation = mod(elementCycle.indexOf(useElement) - elementCycle.indexOf(bodyElement), 5);
+  if (relation === 0) return { label: "体用比和", reading: "体卦与用卦同气，问题更像是同类资源的协调，重点在节奏和边界。" };
+  if (relation === 1) return { label: "体生用", reading: "体卦生用卦，容易把自身精力投入外部事项，宜确认付出是否值得。" };
+  if (relation === 2) return { label: "体克用", reading: "体卦克用卦，表示主动处理和管理外部议题，宜避免过度控制。" };
+  if (relation === 3) return { label: "用克体", reading: "用卦克体卦，外部压力较明显，宜先降低风险、补足信息和支持。" };
+  return { label: "用生体", reading: "用卦生体卦，外部条件对自身有支持，可观察哪些资源能被实际承接。" };
+}
+
+function renderMeihua(result, birthData, sourceLabel = "输入时间") {
+  const yearBranchNumber = getYearPillar(birthData.year).branch + 1;
+  const hourBranchNumber = result.hourBranch + 1;
+  const upperNumber = mod(yearBranchNumber + birthData.month + birthData.day - 1, 8) + 1;
+  const lowerNumber = mod(yearBranchNumber + birthData.month + birthData.day + hourBranchNumber - 1, 8) + 1;
+  const movingLine = mod(yearBranchNumber + birthData.month + birthData.day + hourBranchNumber - 1, 6) + 1;
+  const upper = trigrams[upperNumber - 1];
+  const lower = trigrams[lowerNumber - 1];
+  const originalLines = [...lower.lines, ...upper.lines];
+  const changedLines = flipLines(originalLines, [movingLine]);
+  const mutualLines = [originalLines[1], originalLines[2], originalLines[3], originalLines[2], originalLines[3], originalLines[4]];
+  const originalHexagram = getHexagramFromLines(originalLines);
+  const mutualHexagram = getHexagramFromLines(mutualLines);
+  const changedHexagram = getHexagramFromLines(changedLines);
+  const useTrigram = movingLine > 3 ? upper : lower;
+  const bodyTrigram = movingLine > 3 ? lower : upper;
+  const relation = getBodyUseRelation(bodyTrigram.element, useTrigram.element);
+
+  document.querySelector("#meihua-seed").textContent = `${formatInputTime(birthData)} · ${sourceLabel} · 年支月日时取数`;
+  document.querySelector("#meihua-hexagrams").innerHTML = [
+    renderHexagramBlock("本卦", originalHexagram, [movingLine]),
+    renderHexagramBlock("互卦", mutualHexagram),
+    renderHexagramBlock("变卦", changedHexagram)
+  ].join("");
+  document.querySelector("#meihua-body-use").innerHTML = [
+    { label: "体卦", trigram: bodyTrigram, role: "自身、主位、承接能力" },
+    { label: "用卦", trigram: useTrigram, role: "外部、客位、所问之事" }
+  ].map(item => `<div class="body-use-card">
+    <small>${item.label}</small><strong>${item.trigram.name}·${item.trigram.image}</strong>
+    <span>${item.trigram.element} · ${item.trigram.quality}</span><em>${item.role}</em>
+  </div>`).join("");
+  document.querySelector("#meihua-relation").textContent = `${relation.label}：${relation.reading}`;
+  document.querySelector("#meihua-readings").innerHTML = [
+    { title: "起卦取数", copy: `年支数 ${yearBranchNumber}，月数 ${birthData.month}，日数 ${birthData.day}，时支数 ${hourBranchNumber}；上卦取${upperNumber}为${upper.name}，下卦取${lowerNumber}为${lower.name}。` },
+    { title: `动爻·${lineLabels[movingLine - 1]}`, copy: `${lineLabels[movingLine - 1]}发动，由${originalHexagram.name}转为${changedHexagram.name}。动在${movingLine > 3 ? "上卦" : "下卦"}，所以${useTrigram.name}为用、${bodyTrigram.name}为体。` },
+    { title: "取象提示", copy: `本卦看现状，互卦${mutualHexagram.name}看中间过程，变卦看趋势。${trigramInsights[bodyTrigram.name]} ${trigramInsights[useTrigram.name]}` }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+}
+
+function getGanzhiIndex(stem, branch) {
+  for (let index = 0; index < 60; index += 1) {
+    if (index % 10 === stem && index % 12 === branch) return index;
+  }
+  return 0;
+}
+
+function getQimenDun(month, day) {
+  const marker = dateKey(month, day);
+  return marker >= 1221 || marker < 621 ? "阳遁" : "阴遁";
+}
+
+function renderQimen(result, birthData, sourceLabel = "输入时间") {
+  const dun = getQimenDun(birthData.month, birthData.day);
+  const isYang = dun === "阳遁";
+  const ju = mod(birthData.year + birthData.month * 2 + birthData.day + birthData.hour + (isYang ? 0 : 4), 9) + 1;
+  const hourPillar = result.pillars[3];
+  const hourIndex = getGanzhiIndex(hourPillar.stem, hourPillar.branch);
+  const xunIndex = Math.floor(hourIndex / 10);
+  const xunshou = qimenXunshou[xunIndex];
+  const shift = (isYang ? 1 : -1) * (ju + result.hourBranch + hourPillar.stem);
+  const dutyDoor = qimenDoors[mod(ju + result.hourBranch - 1, 8)];
+  const dutyStar = qimenStars[mod(ju + hourPillar.stem - 1, 9)];
+
+  const palaceModels = qimenPalaces.map(palace => {
+    if (palace.num === 5) {
+      return {
+        ...palace,
+        door: "中宫",
+        star: "天禽",
+        god: "值符",
+        heavenStem: qimenStems[mod(ju + 4, 9)],
+        earthStem: qimenStems[4],
+        tone: "center"
+      };
+    }
+    const flowIndex = qimenFlow.indexOf(palace.num);
+    const door = qimenDoors[mod(flowIndex + shift, 8)];
+    const star = qimenStars[mod(flowIndex + shift + result.dayStem, 9)];
+    const god = qimenGods[mod(flowIndex + shift + hourPillar.stem, 8)];
+    return {
+      ...palace,
+      door,
+      star,
+      god,
+      heavenStem: qimenStems[mod(flowIndex + shift + hourPillar.stem, 9)],
+      earthStem: qimenStems[mod(flowIndex + ju - 1, 9)],
+      tone: ["开门", "休门", "生门"].includes(door) ? "good" : ["伤门", "惊门", "死门"].includes(door) ? "caution" : ""
+    };
+  });
+  const goodPalaces = palaceModels.filter(palace => palace.tone === "good");
+  const dutyPalace = palaceModels.find(palace => palace.door === dutyDoor && palace.num !== 5) || goodPalaces[0] || palaceModels[0];
+
+  document.querySelector("#qimen-time").textContent = `${formatInputTime(birthData)} · ${sourceLabel} · ${stems[hourPillar.stem]}${branches[hourPillar.branch]}时`;
+  document.querySelector("#qimen-core").innerHTML = [
+    { label: "遁局", value: `${dun}${ju}局`, note: isYang ? "冬至后至夏至前取阳遁框架" : "夏至后至冬至前取阴遁框架" },
+    { label: "旬首", value: xunshou, note: `${stems[hourPillar.stem]}${branches[hourPillar.branch]}时所在旬` },
+    { label: "符使", value: `${dutyStar} · ${dutyDoor}`, note: "简化值符和值使门提示" }
+  ].map(item => `<div><small>${item.label}</small><strong>${item.value}</strong><span>${item.note}</span></div>`).join("");
+  document.querySelector("#qimen-grid").innerHTML = palaceModels.map(palace => `<div class="qimen-palace ${palace.tone}">
+    <div class="qimen-palace-head"><b>${palace.name}${palace.num}</b><small>${palace.direction} · ${palace.branch}</small></div>
+    <div class="qimen-symbols"><span>${palace.heavenStem}/${palace.earthStem}</span><strong>${palace.door}</strong></div>
+    <div class="qimen-tags"><span>${palace.star}</span><span>${palace.god}</span></div>
+  </div>`).join("");
+  document.querySelector("#qimen-readings").innerHTML = [
+    { title: "三吉门", copy: goodPalaces.length ? goodPalaces.map(palace => `${palace.direction}${palace.name}宫见${palace.door}`).join("，") : "本盘未突出开、休、生三吉门，宜先保守观察。" },
+    { title: `值使·${dutyDoor}`, copy: `${dutyDoor}落${dutyPalace.direction}${dutyPalace.name}宫。${qimenDoorCopy[dutyDoor] || "中宫提示先整合资源，再看外部方向。"}` },
+    { title: "盘面取象", copy: `${dun}${ju}局以${dutyStar}为符、${xunshou}为旬首；可把九宫看作方向和场景清单，优先核实现实条件。` }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+}
+
 function getAdjacentJieDate(year, month, day, hour, minute, forward) {
   const birth = new Date(year, month - 1, day, hour, minute);
   const candidates = [];
@@ -728,6 +1042,48 @@ function renderHealth(elementSummary) {
   document.querySelector("#wellness-list").innerHTML = personalized.map(([title, copy]) => `<div class="wellness-item"><b>${title}</b>${copy}</div>`).join("");
 }
 
+const divinationCastConfigs = {
+  liuyao: {
+    statusSelector: "#liuyao-cast-status",
+    buttonSelector: "#cast-liuyao-current",
+    idleText: "摇一摇",
+    doneText: "已按当前时间摇卦",
+    currentLabel: "当前时间起卦",
+    birthLabel: "出生时间参考",
+    render: renderLiuyao
+  },
+  meihua: {
+    statusSelector: "#meihua-cast-status",
+    buttonSelector: "#cast-meihua-current",
+    idleText: "照一照",
+    doneText: "已按当前时间照见",
+    currentLabel: "当前时间起卦",
+    birthLabel: "出生时间参考",
+    render: renderMeihua
+  },
+  qimen: {
+    statusSelector: "#qimen-cast-status",
+    buttonSelector: "#cast-qimen-current",
+    idleText: "起一局",
+    doneText: "已按当前时间起局",
+    currentLabel: "当前时间起局",
+    birthLabel: "出生时间参考",
+    render: renderQimen
+  }
+};
+
+function renderSingleDivination(kind, divinationData, source) {
+  const config = divinationCastConfigs[kind];
+  const result = calculateBazi(divinationData.year, divinationData.month, divinationData.day, divinationData.hour, divinationData.minute);
+  const isCurrent = source === "current";
+  config.render(result, divinationData, isCurrent ? config.currentLabel : config.birthLabel);
+  document.querySelector(config.statusSelector).textContent = `当前采用${isCurrent ? "当前时间" : "出生资料时间"}：${formatInputTime(divinationData)}`;
+}
+
+function renderDivinationSuite(divinationData, source) {
+  Object.keys(divinationCastConfigs).forEach(kind => renderSingleDivination(kind, divinationData, source));
+}
+
 function switchTab(targetId) {
   document.querySelectorAll(".report-nav button").forEach(button => button.classList.toggle("active", button.dataset.target === targetId));
   document.querySelectorAll(".report-panel").forEach(panel => panel.classList.toggle("active", panel.id === targetId));
@@ -740,6 +1096,20 @@ document.querySelectorAll(".report-nav button").forEach(button => {
 document.querySelector("#edit-profile").addEventListener("click", () => {
   document.querySelector("#birth-form").scrollIntoView({ behavior: "smooth", block: "center" });
   document.querySelector("#birth-date").focus({ preventScroll: true });
+});
+
+Object.entries(divinationCastConfigs).forEach(([kind, config]) => {
+  document.querySelector(config.buttonSelector).addEventListener("click", () => {
+    const nowData = getDateTimeParts(new Date());
+    const button = document.querySelector(config.buttonSelector);
+    renderSingleDivination(kind, nowData, "current");
+    button.textContent = config.doneText;
+    button.classList.add("just-cast");
+    setTimeout(() => {
+      button.textContent = config.idleText;
+      button.classList.remove("just-cast");
+    }, 1600);
+  });
 });
 
 document.querySelector("#birth-form").addEventListener("submit", event => {
@@ -787,6 +1157,7 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
   const gender = document.querySelector("#gender").value;
   renderLuck(result, chartAnalysis, { year, month, day, hour, minute }, gender);
   renderZiwei(year, month, day, result.hourBranch);
+  renderDivinationSuite({ year, month, day, hour, minute }, "birth");
   renderHealth(elementSummary);
 
   const name = document.querySelector("#name").value.trim();
