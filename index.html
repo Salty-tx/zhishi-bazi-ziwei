@@ -78,11 +78,14 @@
                 <option value="unspecified">不选择</option>
               </select>
             </label>
-            <label>
-              <span>出生地 <small>用于校时</small></span>
-              <input id="location" type="text" value="中国·上海" placeholder="城市" list="location-options" />
-              <datalist id="location-options"></datalist>
-            </label>
+            <div class="location-field">
+              <label for="location">出生地 <small>用于校时</small></label>
+              <div class="location-input-wrap">
+                <input id="location" type="text" value="中国·上海" placeholder="城市" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="location-options" aria-expanded="false" />
+                <button class="location-toggle" id="location-toggle" type="button" aria-label="展开城市候选" aria-controls="location-options" aria-expanded="false"></button>
+                <div class="location-options" id="location-options" role="listbox" hidden></div>
+              </div>
+            </div>
           </div>
 
           <details class="advanced">

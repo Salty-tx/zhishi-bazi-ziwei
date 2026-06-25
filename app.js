@@ -1351,11 +1351,70 @@ function getLocationOptionMatches(query) {
     .slice(0, 80);
 }
 
-function populateLocationOptions(query = "") {
-  const options = document.querySelector("#location-options");
-  options.innerHTML = getLocationOptionMatches(query).map(preset => (
-    `<option value="${preset.label}">${formatLongitude(preset.longitude)} · ${formatTimezone(preset.timezone)}</option>`
-  )).join("");
+const locationOptionState = {
+  matches: [],
+  activeIndex: -1
+};
+
+function getLocationControls() {
+  return {
+    input: document.querySelector("#location"),
+    toggle: document.querySelector("#location-toggle"),
+    options: document.querySelector("#location-options")
+  };
+}
+
+function renderLocationOption(preset, index) {
+  return `<button class="location-option" id="location-option-${index}" type="button" role="option" aria-selected="false" data-location-index="${index}">
+    <strong>${escapeHtml(preset.label)}</strong>
+    <small>${formatLongitude(preset.longitude)} · ${formatTimezone(preset.timezone)}</small>
+  </button>`;
+}
+
+function updateLocationActiveOption() {
+  const { input, options } = getLocationControls();
+  const buttons = Array.from(options.querySelectorAll(".location-option"));
+  buttons.forEach((button, index) => {
+    const isActive = index === locationOptionState.activeIndex;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    if (isActive) {
+      input.setAttribute("aria-activedescendant", button.id);
+      button.scrollIntoView({ block: "nearest" });
+    }
+  });
+  if (locationOptionState.activeIndex < 0) {
+    input.removeAttribute("aria-activedescendant");
+  }
+}
+
+function setLocationOptionsOpen(isOpen) {
+  const { input, toggle, options } = getLocationControls();
+  options.hidden = !isOpen;
+  input.setAttribute("aria-expanded", String(isOpen));
+  toggle.setAttribute("aria-expanded", String(isOpen));
+  if (!isOpen) {
+    locationOptionState.activeIndex = -1;
+    updateLocationActiveOption();
+  }
+}
+
+function populateLocationOptions(query = "", { open = false } = {}) {
+  const { options } = getLocationControls();
+  locationOptionState.matches = getLocationOptionMatches(query);
+  locationOptionState.activeIndex = -1;
+  options.innerHTML = locationOptionState.matches.map(renderLocationOption).join("");
+  setLocationOptionsOpen(open && locationOptionState.matches.length > 0);
+}
+
+function chooseLocationOption(index) {
+  const preset = locationOptionState.matches[index];
+  if (!preset) return;
+  const { input } = getLocationControls();
+  input.value = preset.label;
+  setLocationOptionsOpen(false);
+  syncLocationPreset({ autoEnable: true });
+  input.focus();
 }
 
 function syncLocationPreset({ autoEnable = false } = {}) {
@@ -1396,16 +1455,74 @@ function syncLocationPreset({ autoEnable = false } = {}) {
 
 populateLocationOptions();
 
+document.querySelector("#location-toggle").addEventListener("mousedown", event => {
+  event.preventDefault();
+});
+document.querySelector("#location-toggle").addEventListener("click", () => {
+  const { input, options } = getLocationControls();
+  if (options.hidden) {
+    populateLocationOptions(input.value, { open: true });
+    input.focus();
+  } else {
+    setLocationOptionsOpen(false);
+  }
+});
+document.querySelector("#location-options").addEventListener("mousedown", event => {
+  event.preventDefault();
+});
+document.querySelector("#location-options").addEventListener("click", event => {
+  const optionButton = event.target instanceof Element ? event.target.closest(".location-option") : null;
+  if (!optionButton) return;
+  chooseLocationOption(Number(optionButton.dataset.locationIndex));
+});
+document.addEventListener("click", event => {
+  if (event.target instanceof Element && event.target.closest(".location-input-wrap")) return;
+  setLocationOptionsOpen(false);
+});
+document.querySelector("#location").addEventListener("focus", event => {
+  populateLocationOptions(event.currentTarget.value, { open: true });
+});
+document.querySelector("#location").addEventListener("keydown", event => {
+  const { options } = getLocationControls();
+  if (event.key === "Escape") {
+    setLocationOptionsOpen(false);
+    return;
+  }
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Enter") return;
+  if (event.key === "Enter") {
+    if (!options.hidden && locationOptionState.activeIndex >= 0) {
+      event.preventDefault();
+      chooseLocationOption(locationOptionState.activeIndex);
+    }
+    return;
+  }
+  event.preventDefault();
+  if (options.hidden) {
+    populateLocationOptions(event.currentTarget.value, { open: true });
+  }
+  if (!locationOptionState.matches.length) return;
+  const direction = event.key === "ArrowDown" ? 1 : -1;
+  locationOptionState.activeIndex = locationOptionState.activeIndex < 0
+    ? (direction > 0 ? 0 : locationOptionState.matches.length - 1)
+    : (locationOptionState.activeIndex + direction + locationOptionState.matches.length) % locationOptionState.matches.length;
+  updateLocationActiveOption();
+});
 document.querySelector("#location").addEventListener("input", () => {
   const locationInput = document.querySelector("#location");
-  populateLocationOptions(locationInput.value);
+  populateLocationOptions(locationInput.value, { open: document.activeElement === locationInput });
   const resolution = resolveLocationPreset(locationInput.value);
   if (resolution.status === "match" || document.querySelector("#longitude").dataset.autoLocation === "true") {
     syncLocationPreset({ autoEnable: true });
   }
 });
 document.querySelector("#location").addEventListener("change", () => syncLocationPreset({ autoEnable: true }));
-document.querySelector("#location").addEventListener("blur", () => syncLocationPreset({ autoEnable: true }));
+document.querySelector("#location").addEventListener("blur", () => {
+  window.setTimeout(() => {
+    if (document.activeElement instanceof Element && document.activeElement.closest(".location-input-wrap")) return;
+    setLocationOptionsOpen(false);
+  }, 80);
+  syncLocationPreset({ autoEnable: true });
+});
 document.querySelector("#longitude").addEventListener("input", event => {
   event.currentTarget.dataset.autoLocation = "false";
 });
