@@ -18,48 +18,35 @@ const nameElementDictionary = {
   "金": "金鑫钊钧钰铭铮银锋锐锦键锡镇铠铎铃钟鉴镜铁钱銮琛瑜瑞瑾璟珂珊珠玉白西秋辛",
   "水": "水永冰泉汐江河沐沛沁沙沅沐沂沫泓波泽洁洋洛津洪洲涵淇淋淼清渊湘溪源滢漪潇澜雨雪霖露云北子亥玄"
 };
-const locationPresets = [
-  { label: "中国·北京", longitude: 116.40, timezone: 8, aliases: ["北京", "北京市", "中国北京"] },
-  { label: "中国·上海", longitude: 121.47, timezone: 8, aliases: ["上海", "上海市", "中国上海"] },
-  { label: "中国·广州", longitude: 113.26, timezone: 8, aliases: ["广州", "广州市", "中国广州"] },
-  { label: "中国·深圳", longitude: 114.06, timezone: 8, aliases: ["深圳", "深圳市", "中国深圳"] },
-  { label: "中国·杭州", longitude: 120.15, timezone: 8, aliases: ["杭州", "杭州市", "中国杭州"] },
-  { label: "中国·南京", longitude: 118.80, timezone: 8, aliases: ["南京", "南京市", "中国南京"] },
-  { label: "中国·苏州", longitude: 120.58, timezone: 8, aliases: ["苏州", "苏州市", "中国苏州"] },
-  { label: "中国·成都", longitude: 104.07, timezone: 8, aliases: ["成都", "成都市", "中国成都"] },
-  { label: "中国·重庆", longitude: 106.55, timezone: 8, aliases: ["重庆", "重庆市", "中国重庆"] },
-  { label: "中国·武汉", longitude: 114.30, timezone: 8, aliases: ["武汉", "武汉市", "中国武汉"] },
-  { label: "中国·西安", longitude: 108.94, timezone: 8, aliases: ["西安", "西安市", "中国西安"] },
-  { label: "中国·天津", longitude: 117.20, timezone: 8, aliases: ["天津", "天津市", "中国天津"] },
-  { label: "中国·厦门", longitude: 118.09, timezone: 8, aliases: ["厦门", "厦门市", "中国厦门"] },
-  { label: "中国·青岛", longitude: 120.38, timezone: 8, aliases: ["青岛", "青岛市", "中国青岛"] },
-  { label: "中国·大连", longitude: 121.61, timezone: 8, aliases: ["大连", "大连市", "中国大连"] },
-  { label: "中国·沈阳", longitude: 123.43, timezone: 8, aliases: ["沈阳", "沈阳市", "中国沈阳"] },
-  { label: "中国·哈尔滨", longitude: 126.53, timezone: 8, aliases: ["哈尔滨", "哈尔滨市", "中国哈尔滨"] },
-  { label: "中国·长沙", longitude: 112.94, timezone: 8, aliases: ["长沙", "长沙市", "中国长沙"] },
-  { label: "中国·郑州", longitude: 113.62, timezone: 8, aliases: ["郑州", "郑州市", "中国郑州"] },
-  { label: "中国·济南", longitude: 117.12, timezone: 8, aliases: ["济南", "济南市", "中国济南"] },
-  { label: "中国·昆明", longitude: 102.83, timezone: 8, aliases: ["昆明", "昆明市", "中国昆明"] },
-  { label: "中国·贵阳", longitude: 106.63, timezone: 8, aliases: ["贵阳", "贵阳市", "中国贵阳"] },
-  { label: "中国·南宁", longitude: 108.37, timezone: 8, aliases: ["南宁", "南宁市", "中国南宁"] },
-  { label: "中国·福州", longitude: 119.30, timezone: 8, aliases: ["福州", "福州市", "中国福州"] },
-  { label: "中国·合肥", longitude: 117.23, timezone: 8, aliases: ["合肥", "合肥市", "中国合肥"] },
-  { label: "中国·南昌", longitude: 115.86, timezone: 8, aliases: ["南昌", "南昌市", "中国南昌"] },
-  { label: "中国·太原", longitude: 112.55, timezone: 8, aliases: ["太原", "太原市", "中国太原"] },
-  { label: "中国·呼和浩特", longitude: 111.75, timezone: 8, aliases: ["呼和浩特", "呼市", "中国呼和浩特"] },
-  { label: "中国·银川", longitude: 106.23, timezone: 8, aliases: ["银川", "银川市", "中国银川"] },
-  { label: "中国·兰州", longitude: 103.84, timezone: 8, aliases: ["兰州", "兰州市", "中国兰州"] },
-  { label: "中国·西宁", longitude: 101.78, timezone: 8, aliases: ["西宁", "西宁市", "中国西宁"] },
-  { label: "中国·乌鲁木齐", longitude: 87.62, timezone: 8, aliases: ["乌鲁木齐", "乌市", "新疆乌鲁木齐", "中国乌鲁木齐"] },
-  { label: "中国·拉萨", longitude: 91.13, timezone: 8, aliases: ["拉萨", "拉萨市", "中国拉萨"] },
-  { label: "中国·海口", longitude: 110.20, timezone: 8, aliases: ["海口", "海口市", "中国海口"] },
-  { label: "中国·香港", longitude: 114.17, timezone: 8, aliases: ["香港", "香港特别行政区", "中国香港"] },
-  { label: "中国·澳门", longitude: 113.54, timezone: 8, aliases: ["澳门", "澳门特别行政区", "中国澳门"] },
-  { label: "中国·台北", longitude: 121.56, timezone: 8, aliases: ["台北", "台北市", "台湾台北", "中国台北"] },
+const fallbackChinaLocationRows = [
+  ["北京市", 116.40, "北京市", "", "province"],
+  ["上海市", 121.47, "上海市", "", "province"],
+  ["广州市", 113.26, "广东省", "", "city"],
+  ["深圳市", 114.06, "广东省", "", "city"],
+  ["杭州市", 120.15, "浙江省", "", "city"],
+  ["南京市", 118.80, "江苏省", "", "city"],
+  ["成都市", 104.07, "四川省", "", "city"],
+  ["重庆市", 106.55, "重庆市", "", "province"],
+  ["武汉市", 114.30, "湖北省", "", "city"],
+  ["西安市", 108.94, "陕西省", "", "city"],
+  ["乌鲁木齐市", 87.62, "新疆维吾尔自治区", "", "city"],
+  ["香港特别行政区", 114.17, "香港特别行政区", "", "province"],
+  ["澳门特别行政区", 113.54, "澳门特别行政区", "", "province"],
+  ["台北市", 121.56, "台湾省", "", "city"]
+];
+const supplementalChinaLocationRows = [
+  ["台北市", 121.56, "台湾省", "", "city"]
+];
+const externalChinaLocationRows = typeof window !== "undefined" && Array.isArray(window.CHINA_LOCATION_ROWS) ? window.CHINA_LOCATION_ROWS : [];
+const internationalLocationPresets = [
   { label: "新加坡", longitude: 103.82, timezone: 8, aliases: ["Singapore", "新加坡市"] },
   { label: "日本·东京", longitude: 139.69, timezone: 9, aliases: ["东京", "東京", "Tokyo"] },
   { label: "韩国·首尔", longitude: 126.98, timezone: 9, aliases: ["首尔", "首爾", "Seoul"] }
 ];
+const locationPresets = [
+  ...uniqueChinaLocationRows(externalChinaLocationRows.length ? [...externalChinaLocationRows, ...supplementalChinaLocationRows] : fallbackChinaLocationRows).map(createChinaLocationPreset),
+  ...internationalLocationPresets
+].map(prepareLocationPreset);
 const locationLookup = new Map();
 
 const trigrams = [
@@ -277,14 +264,106 @@ function normalizeLocation(value) {
     .toLowerCase();
 }
 
+function shortRegionName(name) {
+  return name
+    .replace(/特别行政区$/, "")
+    .replace(/维吾尔自治区$/, "")
+    .replace(/壮族自治区$/, "")
+    .replace(/回族自治区$/, "")
+    .replace(/自治区$/, "")
+    .replace(/省$/, "")
+    .replace(/市$/, "")
+    .replace(/地区$/, "")
+    .replace(/自治州$/, "")
+    .replace(/盟$/, "")
+    .replace(/新区$/, "")
+    .replace(/自治县$/, "")
+    .replace(/县$/, "")
+    .replace(/区$/, "");
+}
+
+function uniqueList(items) {
+  return items.filter((item, index, list) => item && list.indexOf(item) === index);
+}
+
+function uniqueChinaLocationRows(rows) {
+  const seenRows = new Set();
+  return rows.filter(row => {
+    const key = `${row[0]}|${row[2]}|${row[3]}`;
+    if (seenRows.has(key)) return false;
+    seenRows.add(key);
+    return true;
+  });
+}
+
+function createChinaLocationPreset(row) {
+  const [name, longitude, province, parentCity, level] = row;
+  const provinceShort = shortRegionName(province);
+  const cityShort = parentCity ? shortRegionName(parentCity) : "";
+  const nameShort = shortRegionName(name);
+  const displayName = level === "district" && (!nameShort || nameShort === cityShort) ? name : nameShort;
+  const parts = ["中国", provinceShort];
+  if (level === "district" && cityShort && cityShort !== provinceShort) parts.push(cityShort);
+  if (displayName && displayName !== parts[parts.length - 1]) parts.push(displayName);
+  const aliases = uniqueList([
+    name, nameShort,
+    `中国${name}`, `中国${nameShort}`,
+    `${province}${name}`, `${provinceShort}${nameShort}`,
+    parentCity && `${parentCity}${name}`,
+    cityShort && `${cityShort}${nameShort}`,
+    parentCity && `${province}${parentCity}${name}`,
+    parentCity && `${provinceShort}${cityShort}${nameShort}`
+  ]);
+  return {
+    label: parts.join("·"),
+    longitude: Number(longitude),
+    timezone: 8,
+    level,
+    province,
+    city: parentCity,
+    aliases
+  };
+}
+
+function prepareLocationPreset(preset) {
+  const aliases = preset.aliases || [];
+  return {
+    ...preset,
+    aliases,
+    searchText: [preset.label, ...aliases].map(alias => normalizeLocation(alias)).join("|")
+  };
+}
+
+function addLocationAlias(alias, preset) {
+  const normalized = normalizeLocation(alias);
+  if (!normalized) return;
+  const matches = locationLookup.get(normalized) || [];
+  if (!matches.some(match => match.label === preset.label)) matches.push(preset);
+  locationLookup.set(normalized, matches);
+}
+
 locationPresets.forEach(preset => {
   [preset.label, ...preset.aliases].forEach(alias => {
-    locationLookup.set(normalizeLocation(alias), preset);
+    addLocationAlias(alias, preset);
   });
 });
 
+function resolveLocationPreset(value) {
+  const normalized = normalizeLocation(value);
+  if (!normalized) return { status: "empty", matches: [] };
+  const matches = locationLookup.get(normalized) || [];
+  if (matches.length === 1) return { status: "match", preset: matches[0], matches };
+  if (matches.length > 1) return { status: "ambiguous", matches };
+  return { status: "missing", matches: [] };
+}
+
 function findLocationPreset(value) {
-  return locationLookup.get(normalizeLocation(value));
+  const resolution = resolveLocationPreset(value);
+  return resolution.status === "match" ? resolution.preset : null;
+}
+
+function formatLocationExamples(matches) {
+  return matches.slice(0, 3).map(match => match.label.replace(/^中国·/, "")).join("、");
 }
 
 function formatLongitude(longitude) {
@@ -1261,9 +1340,20 @@ function switchTab(targetId) {
   document.querySelectorAll(".report-panel").forEach(panel => panel.classList.toggle("active", panel.id === targetId));
 }
 
-function populateLocationOptions() {
+function getLocationOptionMatches(query) {
+  const normalized = normalizeLocation(query);
+  const rankByLevel = { province: 0, city: 1, district: 2 };
+  const matches = normalized
+    ? locationPresets.filter(preset => preset.searchText.includes(normalized))
+    : locationPresets.filter(preset => preset.level !== "district");
+  return matches
+    .sort((left, right) => (rankByLevel[left.level] ?? 3) - (rankByLevel[right.level] ?? 3) || left.label.localeCompare(right.label, "zh-Hans-CN"))
+    .slice(0, 80);
+}
+
+function populateLocationOptions(query = "") {
   const options = document.querySelector("#location-options");
-  options.innerHTML = locationPresets.map(preset => (
+  options.innerHTML = getLocationOptionMatches(query).map(preset => (
     `<option value="${preset.label}">${formatLongitude(preset.longitude)} · ${formatTimezone(preset.timezone)}</option>`
   )).join("");
 }
@@ -1274,19 +1364,22 @@ function syncLocationPreset({ autoEnable = false } = {}) {
   const timezoneSelect = document.querySelector("#timezone");
   const correctionInput = document.querySelector("#solar-correction");
   const hint = document.querySelector("#form-hint");
-  const preset = findLocationPreset(locationInput.value);
-  if (!preset) {
+  const resolution = resolveLocationPreset(locationInput.value);
+  if (resolution.status !== "match") {
     if (autoEnable && longitudeInput.dataset.autoLocation === "true") {
       longitudeInput.value = "";
       correctionInput.checked = false;
     }
     if (autoEnable && locationInput.value.trim()) {
-      hint.textContent = "未匹配城市，可手填经度后校正。";
+      hint.textContent = resolution.status === "ambiguous"
+        ? `匹配到多个地点，请补充省市，例如：${formatLocationExamples(resolution.matches)}。`
+        : "未匹配城市，可手填经度后校正。";
       hint.classList.remove("error");
     }
     return null;
   }
 
+  const { preset } = resolution;
   const shouldUpdateLongitude = autoEnable || longitudeInput.value === "" || longitudeInput.dataset.autoLocation === "true";
   if (shouldUpdateLongitude) {
     longitudeInput.value = preset.longitude.toFixed(2);
@@ -1304,7 +1397,12 @@ function syncLocationPreset({ autoEnable = false } = {}) {
 populateLocationOptions();
 
 document.querySelector("#location").addEventListener("input", () => {
-  if (findLocationPreset(document.querySelector("#location").value)) syncLocationPreset({ autoEnable: true });
+  const locationInput = document.querySelector("#location");
+  populateLocationOptions(locationInput.value);
+  const resolution = resolveLocationPreset(locationInput.value);
+  if (resolution.status === "match" || document.querySelector("#longitude").dataset.autoLocation === "true") {
+    syncLocationPreset({ autoEnable: true });
+  }
 });
 document.querySelector("#location").addEventListener("change", () => syncLocationPreset({ autoEnable: true }));
 document.querySelector("#location").addEventListener("blur", () => syncLocationPreset({ autoEnable: true }));
@@ -1312,7 +1410,7 @@ document.querySelector("#longitude").addEventListener("input", event => {
   event.currentTarget.dataset.autoLocation = "false";
 });
 document.querySelector("#solar-correction").addEventListener("change", event => {
-  if (event.currentTarget.checked) syncLocationPreset();
+  if (event.currentTarget.checked) syncLocationPreset({ autoEnable: true });
 });
 
 document.querySelectorAll(".report-nav button").forEach(button => {
