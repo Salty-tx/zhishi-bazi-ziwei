@@ -54,7 +54,7 @@
           </div>
 
           <label>
-            <span>称呼 <small>选填</small></span>
+            <span>称呼 <small>参与姓名五行</small></span>
             <input id="name" type="text" maxlength="20" placeholder="如：青和" />
           </label>
 
@@ -79,8 +79,9 @@
               </select>
             </label>
             <label>
-              <span>出生地</span>
-              <input id="location" type="text" value="中国·上海" placeholder="城市" />
+              <span>出生地 <small>用于校时</small></span>
+              <input id="location" type="text" value="中国·上海" placeholder="城市" list="location-options" />
+              <datalist id="location-options"></datalist>
             </label>
           </div>
 
@@ -88,7 +89,7 @@
             <summary>高级时间校正</summary>
             <div class="advanced-grid">
               <label>
-                <span>出生地经度 <small>选填</small></span>
+                <span>出生地经度 <small>自动或手填</small></span>
                 <input id="longitude" type="number" min="-180" max="180" step="0.01" placeholder="上海 121.47" />
               </label>
               <label>
@@ -194,7 +195,7 @@
               <div class="ten-god-grid" id="ten-god-grid"></div>
             </div>
             <div class="narrative-grid" id="chart-deep-readings"></div>
-            <p class="analysis-boundary">强弱与平衡方向是离线简化模型，不等同于专业命理中的格局、调候或喜用神结论。</p>
+            <p class="analysis-boundary">强弱、姓名五行与平衡方向是离线简化模型；姓名只作为辅助观察，不改变出生四柱，也不等同于专业命理中的格局、调候或喜用神结论。</p>
 
             <div class="five-senses-section">
               <div class="five-senses-heading">

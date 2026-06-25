@@ -138,12 +138,12 @@ input:focus, select:focus { border-color: rgba(30,91,75,.55); box-shadow: 0 0 0 
 .deep-heading, .annual-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
 .deep-heading h3, .luck-intro h3, .annual-heading h3 { margin: 9px 0 0; font: 500 26px var(--serif); }
 .deep-heading > p { max-width: 410px; margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
-.chart-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 25px; }
-.summary-stat { padding: 18px; background: #f0eade; border-bottom: 2px solid var(--gold); }
+.chart-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 25px; }
+.summary-stat { min-width: 0; padding: 18px; background: #f0eade; border-bottom: 2px solid var(--gold); }
 .summary-stat small, .summary-stat strong, .summary-stat span { display: block; }
 .summary-stat small { color: var(--muted); font-size: 9px; }
 .summary-stat strong { margin: 7px 0 4px; font: 500 21px var(--serif); }
-.summary-stat span { color: var(--muted); font-size: 10px; line-height: 1.6; }
+.summary-stat span { color: var(--muted); font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
 .ten-god-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
 .ten-god-title { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
 .ten-god-title h4 { margin: 0; font: 500 19px var(--serif); }

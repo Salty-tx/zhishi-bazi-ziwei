@@ -11,6 +11,56 @@ const hiddenStems = [
   [3, 5], [5, 3, 1], [6, 8, 4], [7], [4, 7, 3], [8, 0]
 ];
 const elementCycle = ["木", "火", "土", "金", "水"];
+const nameElementDictionary = {
+  "木": "木本术朱朴杉李杏材村杜杞杨杭杰松林柏柳栋栩桐桥梅梓森楚楠榕槿樱兰芳芷芸茵荣荣菲萱蓉若英茗蔚蕴青东卿",
+  "火": "火炎炜炫炬炯烁烨焕焱煜熙照煦燕灵灿阳旭明昕昊昌昭映晖晗晓晴晶景智曜曦星晨丽丹彤夏南",
+  "土": "土山屹岐岚岩岳峰峻崇城培基堂坤垚均圣境墨辰宇安宁容宛宸怡恩悠远衡和田里",
+  "金": "金鑫钊钧钰铭铮银锋锐锦键锡镇铠铎铃钟鉴镜铁钱銮琛瑜瑞瑾璟珂珊珠玉白西秋辛",
+  "水": "水永冰泉汐江河沐沛沁沙沅沐沂沫泓波泽洁洋洛津洪洲涵淇淋淼清渊湘溪源滢漪潇澜雨雪霖露云北子亥玄"
+};
+const locationPresets = [
+  { label: "中国·北京", longitude: 116.40, timezone: 8, aliases: ["北京", "北京市", "中国北京"] },
+  { label: "中国·上海", longitude: 121.47, timezone: 8, aliases: ["上海", "上海市", "中国上海"] },
+  { label: "中国·广州", longitude: 113.26, timezone: 8, aliases: ["广州", "广州市", "中国广州"] },
+  { label: "中国·深圳", longitude: 114.06, timezone: 8, aliases: ["深圳", "深圳市", "中国深圳"] },
+  { label: "中国·杭州", longitude: 120.15, timezone: 8, aliases: ["杭州", "杭州市", "中国杭州"] },
+  { label: "中国·南京", longitude: 118.80, timezone: 8, aliases: ["南京", "南京市", "中国南京"] },
+  { label: "中国·苏州", longitude: 120.58, timezone: 8, aliases: ["苏州", "苏州市", "中国苏州"] },
+  { label: "中国·成都", longitude: 104.07, timezone: 8, aliases: ["成都", "成都市", "中国成都"] },
+  { label: "中国·重庆", longitude: 106.55, timezone: 8, aliases: ["重庆", "重庆市", "中国重庆"] },
+  { label: "中国·武汉", longitude: 114.30, timezone: 8, aliases: ["武汉", "武汉市", "中国武汉"] },
+  { label: "中国·西安", longitude: 108.94, timezone: 8, aliases: ["西安", "西安市", "中国西安"] },
+  { label: "中国·天津", longitude: 117.20, timezone: 8, aliases: ["天津", "天津市", "中国天津"] },
+  { label: "中国·厦门", longitude: 118.09, timezone: 8, aliases: ["厦门", "厦门市", "中国厦门"] },
+  { label: "中国·青岛", longitude: 120.38, timezone: 8, aliases: ["青岛", "青岛市", "中国青岛"] },
+  { label: "中国·大连", longitude: 121.61, timezone: 8, aliases: ["大连", "大连市", "中国大连"] },
+  { label: "中国·沈阳", longitude: 123.43, timezone: 8, aliases: ["沈阳", "沈阳市", "中国沈阳"] },
+  { label: "中国·哈尔滨", longitude: 126.53, timezone: 8, aliases: ["哈尔滨", "哈尔滨市", "中国哈尔滨"] },
+  { label: "中国·长沙", longitude: 112.94, timezone: 8, aliases: ["长沙", "长沙市", "中国长沙"] },
+  { label: "中国·郑州", longitude: 113.62, timezone: 8, aliases: ["郑州", "郑州市", "中国郑州"] },
+  { label: "中国·济南", longitude: 117.12, timezone: 8, aliases: ["济南", "济南市", "中国济南"] },
+  { label: "中国·昆明", longitude: 102.83, timezone: 8, aliases: ["昆明", "昆明市", "中国昆明"] },
+  { label: "中国·贵阳", longitude: 106.63, timezone: 8, aliases: ["贵阳", "贵阳市", "中国贵阳"] },
+  { label: "中国·南宁", longitude: 108.37, timezone: 8, aliases: ["南宁", "南宁市", "中国南宁"] },
+  { label: "中国·福州", longitude: 119.30, timezone: 8, aliases: ["福州", "福州市", "中国福州"] },
+  { label: "中国·合肥", longitude: 117.23, timezone: 8, aliases: ["合肥", "合肥市", "中国合肥"] },
+  { label: "中国·南昌", longitude: 115.86, timezone: 8, aliases: ["南昌", "南昌市", "中国南昌"] },
+  { label: "中国·太原", longitude: 112.55, timezone: 8, aliases: ["太原", "太原市", "中国太原"] },
+  { label: "中国·呼和浩特", longitude: 111.75, timezone: 8, aliases: ["呼和浩特", "呼市", "中国呼和浩特"] },
+  { label: "中国·银川", longitude: 106.23, timezone: 8, aliases: ["银川", "银川市", "中国银川"] },
+  { label: "中国·兰州", longitude: 103.84, timezone: 8, aliases: ["兰州", "兰州市", "中国兰州"] },
+  { label: "中国·西宁", longitude: 101.78, timezone: 8, aliases: ["西宁", "西宁市", "中国西宁"] },
+  { label: "中国·乌鲁木齐", longitude: 87.62, timezone: 8, aliases: ["乌鲁木齐", "乌市", "新疆乌鲁木齐", "中国乌鲁木齐"] },
+  { label: "中国·拉萨", longitude: 91.13, timezone: 8, aliases: ["拉萨", "拉萨市", "中国拉萨"] },
+  { label: "中国·海口", longitude: 110.20, timezone: 8, aliases: ["海口", "海口市", "中国海口"] },
+  { label: "中国·香港", longitude: 114.17, timezone: 8, aliases: ["香港", "香港特别行政区", "中国香港"] },
+  { label: "中国·澳门", longitude: 113.54, timezone: 8, aliases: ["澳门", "澳门特别行政区", "中国澳门"] },
+  { label: "中国·台北", longitude: 121.56, timezone: 8, aliases: ["台北", "台北市", "台湾台北", "中国台北"] },
+  { label: "新加坡", longitude: 103.82, timezone: 8, aliases: ["Singapore", "新加坡市"] },
+  { label: "日本·东京", longitude: 139.69, timezone: 9, aliases: ["东京", "東京", "Tokyo"] },
+  { label: "韩国·首尔", longitude: 126.98, timezone: 9, aliases: ["首尔", "首爾", "Seoul"] }
+];
+const locationLookup = new Map();
 
 const trigrams = [
   { number: 1, name: "乾", image: "天", element: "金", lines: [1, 1, 1], direction: "西北", quality: "刚健、开阔、决断" },
@@ -216,6 +266,119 @@ const palaceInterpretations = {
 
 function mod(value, base) { return ((value % base) + base) % base; }
 
+function normalizeLocation(value) {
+  return value.trim().normalize("NFKC")
+    .replace(/\s+/g, "")
+    .replace(/[·•,，.。\-－—_/]/g, "")
+    .replace(/^中华人民共和国/, "")
+    .replace(/^中国/, "")
+    .replace(/特别行政区$/, "")
+    .replace(/市$/, "")
+    .toLowerCase();
+}
+
+locationPresets.forEach(preset => {
+  [preset.label, ...preset.aliases].forEach(alias => {
+    locationLookup.set(normalizeLocation(alias), preset);
+  });
+});
+
+function findLocationPreset(value) {
+  return locationLookup.get(normalizeLocation(value));
+}
+
+function formatLongitude(longitude) {
+  return `${longitude >= 0 ? "东经" : "西经"}${Math.abs(longitude).toFixed(2)}`;
+}
+
+function formatTimezone(timezone) {
+  return `UTC${timezone >= 0 ? "+" : ""}${timezone}`;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function getNameCharacters(name) {
+  return [...name.trim().normalize("NFKC")]
+    .filter(char => !/[\s·•,，.。_\-－—\/]/u.test(char))
+    .slice(0, 12);
+}
+
+function inferNameElement(char) {
+  const dictionaryEntry = elements.find(element => nameElementDictionary[element].includes(char));
+  if (dictionaryEntry) return { element: dictionaryEntry, method: "字义/形旁" };
+  return { element: elements[char.codePointAt(0) % elements.length], method: "字形编码" };
+}
+
+function analyzeName(name) {
+  const characters = getNameCharacters(name);
+  const counts = Object.fromEntries(elements.map(element => [element, 0]));
+  const items = characters.map(char => {
+    const inferred = inferNameElement(char);
+    counts[inferred.element] += 1;
+    return { char, ...inferred };
+  });
+  const firstElementIndex = element => {
+    const index = items.findIndex(item => item.element === element);
+    return index === -1 ? Number.POSITIVE_INFINITY : index;
+  };
+  const sortedElements = [...elements].sort((a, b) => counts[b] - counts[a] || firstElementIndex(a) - firstElementIndex(b) || elements.indexOf(a) - elements.indexOf(b));
+  const activeElements = sortedElements.filter(element => counts[element] > 0);
+  const dominantElements = activeElements.filter(element => counts[element] === counts[sortedElements[0]]);
+  return {
+    hasName: items.length > 0,
+    items,
+    counts,
+    activeElements,
+    dominantElements,
+    dominantLabel: activeElements.length ? dominantElements.join("与") : "未填写",
+    elementTrail: items.map(item => `${escapeHtml(item.char)}(${item.element})`).join(" · ")
+  };
+}
+
+function applyNameInfluence(analysis, nameAnalysis) {
+  const originalBalanceElements = [...analysis.balanceElements];
+  if (!nameAnalysis.hasName) {
+    return {
+      originalBalanceElements,
+      balanceElements: originalBalanceElements,
+      summary: "未填写姓名",
+      reading: "未填写称呼时，命局深读仅依据出生时间、地点校正后的四柱结构。",
+      balanceCopy: analysis.balanceCopy
+    };
+  }
+
+  const suppliedBalance = originalBalanceElements.filter(element => nameAnalysis.counts[element] > 0);
+  const missingBalance = originalBalanceElements.filter(element => nameAnalysis.counts[element] === 0);
+  let balanceElements = originalBalanceElements;
+  let reading;
+  if (missingBalance.length === 1) {
+    balanceElements = [missingBalance[0], suppliedBalance[0]];
+    reading = `姓名已带出${suppliedBalance[0]}的意象，因此后续平衡建议会先观察尚未被姓名覆盖的${missingBalance[0]}。`;
+  } else if (missingBalance.length === 0) {
+    reading = `姓名已经覆盖命局建议的${originalBalanceElements.join("与")}方向，后续建议保留原排序，用于观察这些意象是否在现实中被稳定使用。`;
+  } else {
+    const dominant = nameAnalysis.dominantElements.join("与");
+    reading = `姓名目前偏向${dominant}，与命局建议的${originalBalanceElements.join("与")}不完全重合；后续建议仍以命局平衡方向为主，姓名作为辅助气质参考。`;
+  }
+
+  const nameCopy = `姓名五行：${nameAnalysis.elementTrail || "未形成有效字符"}。${reading}`;
+  return {
+    originalBalanceElements,
+    balanceElements,
+    summary: nameAnalysis.dominantLabel,
+    reading: nameCopy,
+    balanceCopy: `${analysis.balanceCopy}${reading}`
+  };
+}
+
 function getTenGod(dayStem, targetStem) {
   const dayElementIndex = elementCycle.indexOf(stemElements[dayStem]);
   const targetElementIndex = elementCycle.indexOf(stemElements[targetStem]);
@@ -404,15 +567,23 @@ function renderElements(result) {
   return { counts, strongest, weakest, dayElement };
 }
 
-function renderChartAnalysis(result) {
+function renderChartAnalysis(result, name = "") {
   const analysis = analyzeChart(result);
+  const nameAnalysis = analyzeName(name);
+  const nameInfluence = applyNameInfluence(analysis, nameAnalysis);
+  analysis.nameAnalysis = nameAnalysis;
+  analysis.nameInfluence = nameInfluence;
+  analysis.originalBalanceElements = nameInfluence.originalBalanceElements;
+  analysis.balanceElements = nameInfluence.balanceElements;
+  analysis.balanceCopy = nameInfluence.balanceCopy;
   const dayStemName = `${stems[result.dayStem]}${analysis.dayElement}`;
   const supportPercent = Math.round(analysis.supportRatio * 100);
   const dominantGods = analysis.sortedGods.slice(0, 2).map(([god]) => god);
   document.querySelector("#chart-summary").innerHTML = `
     <div class="summary-stat"><small>日主</small><strong>${stemYinYang[result.dayStem]}${dayStemName}</strong><span>${elementCopy[analysis.dayElement].nature}</span></div>
     <div class="summary-stat"><small>简化强弱</small><strong>${analysis.strength}</strong><span>生扶权重约 ${supportPercent}%，已计入月令与藏干</span></div>
-    <div class="summary-stat"><small>主要十神</small><strong>${dominantGods.join("·")}</strong><span>${dominantGods.map(god => tenGodCopy[god].brief).join("，")}</span></div>`;
+    <div class="summary-stat"><small>主要十神</small><strong>${dominantGods.join("·")}</strong><span>${dominantGods.map(god => tenGodCopy[god].brief).join("，")}</span></div>
+    <div class="summary-stat"><small>姓名主气</small><strong>${nameInfluence.summary}</strong><span>${nameAnalysis.hasName ? nameAnalysis.elementTrail : "填写称呼后参与辅助分析"}</span></div>`;
 
   const monthMainStem = hiddenStems[result.pillars[1].branch][0];
   const godEntries = [
@@ -434,6 +605,7 @@ function renderChartAnalysis(result) {
     <article class="narrative-item"><b>日主气质·${dayStemName}</b><p>${stemYinYang[result.dayStem]}${analysis.dayElement}以“${elementCopy[analysis.dayElement].nature}”为象。这是理解行为偏好的起点，不是固定性格标签。</p></article>
     <article class="narrative-item"><b>能量结构·${analysis.strength}</b><p>${strengthReading}</p></article>
     <article class="narrative-item"><b>十神聚焦·${dominantGods.join("与")}</b><p>${dominantReading}</p></article>
+    <article class="narrative-item"><b>姓名参与·${nameInfluence.summary}</b><p>${nameInfluence.reading}</p></article>
     <article class="narrative-item"><b>平衡方向·${analysis.balanceElements.join("与")}</b><p>${analysis.balanceCopy}这是观察方向，不作为穿衣、起名、投资或治疗依据。</p></article>`;
   return analysis;
 }
@@ -1089,6 +1261,60 @@ function switchTab(targetId) {
   document.querySelectorAll(".report-panel").forEach(panel => panel.classList.toggle("active", panel.id === targetId));
 }
 
+function populateLocationOptions() {
+  const options = document.querySelector("#location-options");
+  options.innerHTML = locationPresets.map(preset => (
+    `<option value="${preset.label}">${formatLongitude(preset.longitude)} · ${formatTimezone(preset.timezone)}</option>`
+  )).join("");
+}
+
+function syncLocationPreset({ autoEnable = false } = {}) {
+  const locationInput = document.querySelector("#location");
+  const longitudeInput = document.querySelector("#longitude");
+  const timezoneSelect = document.querySelector("#timezone");
+  const correctionInput = document.querySelector("#solar-correction");
+  const hint = document.querySelector("#form-hint");
+  const preset = findLocationPreset(locationInput.value);
+  if (!preset) {
+    if (autoEnable && longitudeInput.dataset.autoLocation === "true") {
+      longitudeInput.value = "";
+      correctionInput.checked = false;
+    }
+    if (autoEnable && locationInput.value.trim()) {
+      hint.textContent = "未匹配城市，可手填经度后校正。";
+      hint.classList.remove("error");
+    }
+    return null;
+  }
+
+  const shouldUpdateLongitude = autoEnable || longitudeInput.value === "" || longitudeInput.dataset.autoLocation === "true";
+  if (shouldUpdateLongitude) {
+    longitudeInput.value = preset.longitude.toFixed(2);
+    longitudeInput.dataset.autoLocation = "true";
+  }
+  timezoneSelect.value = String(preset.timezone);
+  if (autoEnable) correctionInput.checked = true;
+  if (correctionInput.checked) {
+    hint.textContent = `已匹配${preset.label} · ${formatLongitude(preset.longitude)}，将按平太阳时校正。`;
+    hint.classList.remove("error");
+  }
+  return preset;
+}
+
+populateLocationOptions();
+
+document.querySelector("#location").addEventListener("input", () => {
+  if (findLocationPreset(document.querySelector("#location").value)) syncLocationPreset({ autoEnable: true });
+});
+document.querySelector("#location").addEventListener("change", () => syncLocationPreset({ autoEnable: true }));
+document.querySelector("#location").addEventListener("blur", () => syncLocationPreset({ autoEnable: true }));
+document.querySelector("#longitude").addEventListener("input", event => {
+  event.currentTarget.dataset.autoLocation = "false";
+});
+document.querySelector("#solar-correction").addEventListener("change", event => {
+  if (event.currentTarget.checked) syncLocationPreset();
+});
+
 document.querySelectorAll(".report-nav button").forEach(button => {
   button.addEventListener("click", () => switchTab(button.dataset.target));
 });
@@ -1133,7 +1359,9 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
   let [year, month, day] = dateValue.split("-").map(Number);
   let [hour, minute] = timeValue.split(":").map(Number);
   let correctionNote = "标准时间排盘";
-  if (document.querySelector("#solar-correction").checked) {
+  const correctionInput = document.querySelector("#solar-correction");
+  const locationPreset = correctionInput.checked ? syncLocationPreset() : null;
+  if (correctionInput.checked) {
     const longitude = Number(document.querySelector("#longitude").value);
     const timezone = Number(document.querySelector("#timezone").value);
     if (!Number.isFinite(longitude) || document.querySelector("#longitude").value === "") {
@@ -1144,15 +1372,17 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
     }
     const adjusted = applySolarCorrection(dateValue, timeValue, longitude, timezone);
     ({ year, month, day, hour, minute } = adjusted);
-    correctionNote = `平太阳时 ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} · 校正${adjusted.correctionMinutes >= 0 ? "+" : ""}${adjusted.correctionMinutes}分`;
+    const locationNote = locationPreset ? `${locationPreset.label} · ` : "";
+    correctionNote = `平太阳时 ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} · ${locationNote}${formatLongitude(longitude)} · 校正${adjusted.correctionMinutes >= 0 ? "+" : ""}${adjusted.correctionMinutes}分`;
   }
 
   hint.textContent = "建议使用出生证明上的准确时间";
   hint.classList.remove("error");
+  const name = document.querySelector("#name").value.trim();
   const result = calculateBazi(year, month, day, hour, minute);
   renderPillars(result);
   const elementSummary = renderElements(result);
-  const chartAnalysis = renderChartAnalysis(result);
+  const chartAnalysis = renderChartAnalysis(result, name);
   renderFiveSenseRecommendations(chartAnalysis);
   const gender = document.querySelector("#gender").value;
   renderLuck(result, chartAnalysis, { year, month, day, hour, minute }, gender);
@@ -1160,7 +1390,6 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
   renderDivinationSuite({ year, month, day, hour, minute }, "birth");
   renderHealth(elementSummary);
 
-  const name = document.querySelector("#name").value.trim();
   document.querySelector("#report-name").textContent = name || "你";
   document.querySelector("#solar-time-note").textContent = correctionNote + (result.nearTerm ? " · 交节附近请复核" : "");
   document.querySelector("#reading").hidden = false;
