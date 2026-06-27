@@ -10,7 +10,20 @@ const hiddenStems = [
   [9], [5, 9, 7], [0, 2, 4], [1], [4, 1, 9], [2, 6, 4],
   [3, 5], [5, 3, 1], [6, 8, 4], [7], [4, 7, 3], [8, 0]
 ];
+const pillarLabels = ["年柱", "月柱", "日柱", "时柱"];
 const elementCycle = ["木", "火", "土", "金", "水"];
+const naYinPairs = [
+  "海中金", "炉中火", "大林木", "路旁土", "剑锋金", "山头火",
+  "涧下水", "城头土", "白蜡金", "杨柳木", "泉中水", "屋上土",
+  "霹雳火", "松柏木", "长流水", "沙中金", "山下火", "平地木",
+  "壁上土", "金箔金", "覆灯火", "天河水", "大驿土", "钗钏金",
+  "桑柘木", "大溪水", "沙中土", "天上火", "石榴木", "大海水"
+];
+const lunarDayNames = [
+  "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+  "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+  "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+];
 const nameElementDictionary = {
   "木": "木本术朱朴杉李杏材村杜杞杨杭杰松林柏柳栋栩桐桥梅梓森楚楠榕槿樱兰芳芷芸茵荣荣菲萱蓉若英茗蔚蕴青东卿",
   "火": "火炎炜炫炬炯烁烨焕焱煜熙照煦燕灵灿阳旭明昕昊昌昭映晖晗晓晴晶景智曜曦星晨丽丹彤夏南",
@@ -19,35 +32,128 @@ const nameElementDictionary = {
   "水": "水永冰泉汐江河沐沛沁沙沅沐沂沫泓波泽洁洋洛津洪洲涵淇淋淼清渊湘溪源滢漪潇澜雨雪霖露云北子亥玄"
 };
 const fallbackChinaLocationRows = [
-  ["北京市", 116.40, "北京市", "", "province"],
-  ["上海市", 121.47, "上海市", "", "province"],
-  ["广州市", 113.26, "广东省", "", "city"],
-  ["深圳市", 114.06, "广东省", "", "city"],
-  ["杭州市", 120.15, "浙江省", "", "city"],
-  ["南京市", 118.80, "江苏省", "", "city"],
-  ["成都市", 104.07, "四川省", "", "city"],
-  ["重庆市", 106.55, "重庆市", "", "province"],
-  ["武汉市", 114.30, "湖北省", "", "city"],
-  ["西安市", 108.94, "陕西省", "", "city"],
-  ["乌鲁木齐市", 87.62, "新疆维吾尔自治区", "", "city"],
-  ["香港特别行政区", 114.17, "香港特别行政区", "", "province"],
-  ["澳门特别行政区", 113.54, "澳门特别行政区", "", "province"],
-  ["台北市", 121.56, "台湾省", "", "city"]
+  ["北京市", 116.40, "北京市", "", "province", 39.90],
+  ["上海市", 121.47, "上海市", "", "province", 31.23],
+  ["广州市", 113.26, "广东省", "", "city", 23.13],
+  ["深圳市", 114.06, "广东省", "", "city", 22.54],
+  ["杭州市", 120.15, "浙江省", "", "city", 30.27],
+  ["南京市", 118.80, "江苏省", "", "city", 32.06],
+  ["成都市", 104.07, "四川省", "", "city", 30.57],
+  ["重庆市", 106.55, "重庆市", "", "province", 29.56],
+  ["武汉市", 114.30, "湖北省", "", "city", 30.59],
+  ["西安市", 108.94, "陕西省", "", "city", 34.34],
+  ["乌鲁木齐市", 87.62, "新疆维吾尔自治区", "", "city", 43.82],
+  ["香港特别行政区", 114.17, "香港特别行政区", "", "province", 22.32],
+  ["澳门特别行政区", 113.54, "澳门特别行政区", "", "province", 22.20],
+  ["台北市", 121.56, "台湾省", "", "city", 25.03]
 ];
 const supplementalChinaLocationRows = [
-  ["台北市", 121.56, "台湾省", "", "city"]
+  ["台北市", 121.56, "台湾省", "", "city", 25.03]
 ];
+const locationLatitudeHints = {
+  "北京市": 39.90, "上海市": 31.23, "天津市": 39.12, "重庆市": 29.56,
+  "广州市": 23.13, "深圳市": 22.54, "杭州市": 30.27, "南京市": 32.06,
+  "成都市": 30.57, "武汉市": 30.59, "西安市": 34.34, "郑州市": 34.75,
+  "长沙市": 28.23, "合肥市": 31.82, "福州市": 26.08, "厦门市": 24.48,
+  "南昌市": 28.68, "济南市": 36.65, "青岛市": 36.07, "太原市": 37.87,
+  "石家庄市": 38.04, "沈阳市": 41.80, "大连市": 38.91, "长春市": 43.82,
+  "哈尔滨市": 45.80, "呼和浩特市": 40.82, "银川市": 38.47, "兰州市": 36.06,
+  "西宁市": 36.62, "乌鲁木齐市": 43.82, "拉萨市": 29.65, "昆明市": 25.04,
+  "贵阳市": 26.65, "南宁市": 22.82, "海口市": 20.04, "三亚市": 18.25,
+  "香港特别行政区": 22.32, "澳门特别行政区": 22.20, "台北市": 25.03
+};
 const externalChinaLocationRows = typeof window !== "undefined" && Array.isArray(window.CHINA_LOCATION_ROWS) ? window.CHINA_LOCATION_ROWS : [];
 const internationalLocationPresets = [
-  { label: "新加坡", longitude: 103.82, timezone: 8, aliases: ["Singapore", "新加坡市"] },
-  { label: "日本·东京", longitude: 139.69, timezone: 9, aliases: ["东京", "東京", "Tokyo"] },
-  { label: "韩国·首尔", longitude: 126.98, timezone: 9, aliases: ["首尔", "首爾", "Seoul"] }
+  { label: "新加坡", longitude: 103.82, latitude: 1.35, timezone: 8, aliases: ["Singapore", "新加坡市"] },
+  { label: "日本·东京", longitude: 139.69, latitude: 35.68, timezone: 9, aliases: ["东京", "東京", "Tokyo"] },
+  { label: "韩国·首尔", longitude: 126.98, latitude: 37.57, timezone: 9, aliases: ["首尔", "首爾", "Seoul"] },
+  { label: "印度·新德里", longitude: 77.21, latitude: 28.61, timezone: 5.5, aliases: ["新德里", "New Delhi", "Delhi", "德里"] },
+  { label: "印度·孟买", longitude: 72.88, latitude: 19.08, timezone: 5.5, aliases: ["孟买", "Mumbai", "Bombay"] }
 ];
 const locationPresets = [
   ...uniqueChinaLocationRows(externalChinaLocationRows.length ? [...externalChinaLocationRows, ...supplementalChinaLocationRows] : fallbackChinaLocationRows).map(createChinaLocationPreset),
   ...internationalLocationPresets
 ].map(prepareLocationPreset);
 const locationLookup = new Map();
+const vedicSigns = [
+  { zh: "白羊", en: "Mesha", element: "火", mode: "启动" },
+  { zh: "金牛", en: "Vrishabha", element: "土", mode: "固定" },
+  { zh: "双子", en: "Mithuna", element: "风", mode: "变动" },
+  { zh: "巨蟹", en: "Karka", element: "水", mode: "启动" },
+  { zh: "狮子", en: "Simha", element: "火", mode: "固定" },
+  { zh: "处女", en: "Kanya", element: "土", mode: "变动" },
+  { zh: "天秤", en: "Tula", element: "风", mode: "启动" },
+  { zh: "天蝎", en: "Vrischika", element: "水", mode: "固定" },
+  { zh: "射手", en: "Dhanu", element: "火", mode: "变动" },
+  { zh: "摩羯", en: "Makara", element: "土", mode: "启动" },
+  { zh: "水瓶", en: "Kumbha", element: "风", mode: "固定" },
+  { zh: "双鱼", en: "Meena", element: "水", mode: "变动" }
+];
+const vedicSignLords = ["Mars", "Venus", "Mercury", "Moon", "Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Saturn", "Jupiter"];
+const vedicPlanets = [
+  { id: "Lagna", zh: "上升", abbr: "As", copy: "身体入口、命盘方向与现实承载力。" },
+  { id: "Sun", zh: "太阳", abbr: "Su", copy: "自我光源、父亲/权威、使命感与可见度。" },
+  { id: "Moon", zh: "月亮", abbr: "Mo", copy: "心智、情绪节律、母亲经验与安全感。" },
+  { id: "Mars", zh: "火星", abbr: "Ma", copy: "行动、冲突、勇气、执行速度与边界推进。" },
+  { id: "Mercury", zh: "水星", abbr: "Me", copy: "语言、学习、交易、分析和适应能力。" },
+  { id: "Jupiter", zh: "木星", abbr: "Ju", copy: "老师、信念、扩张、智慧与保护性资源。" },
+  { id: "Venus", zh: "金星", abbr: "Ve", copy: "关系、美感、愉悦、协商和价值交换。" },
+  { id: "Saturn", zh: "土星", abbr: "Sa", copy: "时间、责任、延迟、结构、耐受力和现实检验。" },
+  { id: "Rahu", zh: "罗睺", abbr: "Ra", copy: "放大、异质经验、欲望、突破与不稳定吸引。" },
+  { id: "Ketu", zh: "计都", abbr: "Ke", copy: "剥离、内化、切断、前因与非世俗专注。" }
+];
+const vedicPlanetIds = vedicPlanets.map(planet => planet.id);
+const vedicKarakaOrder = ["AK", "AmK", "BK", "MK", "PK", "GK", "DK"];
+const vedicKarakaLabels = {
+  AK: "Atmakaraka 灵魂主线",
+  AmK: "Amatyakaraka 事业执行",
+  BK: "Bhratrikaraka 同辈/勇气",
+  MK: "Matrikaraka 照护/根基",
+  PK: "Putrakaraka 创造/恋爱",
+  GK: "Gnatikaraka 压力/竞争",
+  DK: "Darakaraka 伴侣镜像"
+};
+const vedicDashaOrder = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"];
+const vedicDashaYears = { Ketu: 7, Venus: 20, Sun: 6, Moon: 10, Mars: 7, Rahu: 18, Jupiter: 16, Saturn: 19, Mercury: 17 };
+const vedicNakshatras = [
+  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
+  "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+  "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+];
+const vedicNakshatraLords = vedicNakshatras.map((_, index) => vedicDashaOrder[index % vedicDashaOrder.length]);
+const vedicDignities = {
+  Sun: { own: [4], exalted: 0, debilitated: 6 },
+  Moon: { own: [3], exalted: 1, debilitated: 7 },
+  Mars: { own: [0, 7], exalted: 9, debilitated: 3 },
+  Mercury: { own: [2, 5], exalted: 5, debilitated: 11 },
+  Jupiter: { own: [8, 11], exalted: 3, debilitated: 9 },
+  Venus: { own: [1, 6], exalted: 11, debilitated: 5 },
+  Saturn: { own: [9, 10], exalted: 6, debilitated: 0 }
+};
+const vedicGrahaDrishti = {
+  Mars: [4, 7, 8],
+  Jupiter: [5, 7, 9],
+  Saturn: [3, 7, 10]
+};
+const vedicSkillCoverage = [
+  { key: "reader", title: "vedic-reader", body: "统一读盘入口，前端按 structured_data 契约展示 D1、月宿、Chara Karaka 与校验边界。" },
+  { key: "calculator", title: "vedic-calculator", body: "以离线近似恒星黄道生成 D1/D9 与 Vimshottari 预览；精排应交给 pysweph/JHora。" },
+  { key: "core", title: "vedic-core", body: "按 P1-P12 思路拆角色、尊贵度、宫位、相位、月宿、Yoga 与 Dasha 线索。" },
+  { key: "love", title: "vedic-love", body: "聚焦 5宫、7宫、Venus/Jupiter、PK/DK 与关系时间窗口，不做宿命化定断。" },
+  { key: "career", title: "vedic-career", body: "聚焦 10宫、10主、AmK、Saturn/Jupiter 与 D9 支撑，提示事业生态位。" },
+  { key: "rectifier", title: "vedic-rectifier", body: "时辰不确定时引导收集五类人生事件，用 Dasha/宫位映射做校时线索。" },
+  { key: "synastry", title: "vedic-synastry", body: "合盘按 A→B 与 B→A 分向分析，月宿只作筛查，不输出单一匹配分。" }
+];
+const vedicRectifierEvents = [
+  { event: "升学/毕业/考试", houses: "4/5/9", cue: "教育、证书、师承或方向转换" },
+  { event: "入职/转岗/创业", houses: "10/6/2", cue: "职业身份、职责压力与收入结构" },
+  { event: "恋爱/订婚/结婚", houses: "5/7/UL", cue: "关系启动、承诺、公开化节点" },
+  { event: "搬家/买房/远行", houses: "4/12/9", cue: "居住根基、远方环境、空间变化" },
+  { event: "疾病/手术/事故", houses: "6/8/12", cue: "压力峰值、损伤、修复与隐性消耗" }
+];
+let currentVedicChart = null;
+let currentVedicBirthData = null;
+let currentVedicMeta = null;
 
 const trigrams = [
   { number: 1, name: "乾", image: "天", element: "金", lines: [1, 1, 1], direction: "西北", quality: "刚健、开阔、决断" },
@@ -297,7 +403,7 @@ function uniqueChinaLocationRows(rows) {
 }
 
 function createChinaLocationPreset(row) {
-  const [name, longitude, province, parentCity, level] = row;
+  const [name, longitude, province, parentCity, level, latitude] = row;
   const provinceShort = shortRegionName(province);
   const cityShort = parentCity ? shortRegionName(parentCity) : "";
   const nameShort = shortRegionName(name);
@@ -314,9 +420,13 @@ function createChinaLocationPreset(row) {
     parentCity && `${province}${parentCity}${name}`,
     parentCity && `${provinceShort}${cityShort}${nameShort}`
   ]);
+  const inferredLatitude = Number.isFinite(Number(latitude))
+    ? Number(latitude)
+    : locationLatitudeHints[name] ?? locationLatitudeHints[parentCity] ?? locationLatitudeHints[province] ?? null;
   return {
     label: parts.join("·"),
     longitude: Number(longitude),
+    latitude: inferredLatitude,
     timezone: 8,
     level,
     province,
@@ -370,8 +480,16 @@ function formatLongitude(longitude) {
   return `${longitude >= 0 ? "东经" : "西经"}${Math.abs(longitude).toFixed(2)}`;
 }
 
+function formatLatitude(latitude) {
+  return `${latitude >= 0 ? "北纬" : "南纬"}${Math.abs(latitude).toFixed(2)}`;
+}
+
 function formatTimezone(timezone) {
-  return `UTC${timezone >= 0 ? "+" : ""}${timezone}`;
+  const numeric = Number(timezone);
+  const abs = Math.abs(numeric);
+  const hours = Math.floor(abs);
+  const minutes = Math.round((abs - hours) * 60);
+  return `UTC${numeric >= 0 ? "+" : "-"}${hours}${minutes ? `:${String(minutes).padStart(2, "0")}` : ""}`;
 }
 
 function escapeHtml(value) {
@@ -382,6 +500,695 @@ function escapeHtml(value) {
     "\"": "&quot;",
     "'": "&#39;"
   })[char]);
+}
+
+function degToRad(degrees) { return degrees * Math.PI / 180; }
+
+function radToDeg(radians) { return radians * 180 / Math.PI; }
+
+function rev(degrees) { return mod(degrees, 360); }
+
+function sinDeg(degrees) { return Math.sin(degToRad(degrees)); }
+
+function cosDeg(degrees) { return Math.cos(degToRad(degrees)); }
+
+function tanDeg(degrees) { return Math.tan(degToRad(degrees)); }
+
+function localBirthToUtcMillis(year, month, day, hour, minute, timezone) {
+  return Date.UTC(year, month - 1, day, hour || 0, minute || 0) - Number(timezone) * 60 * 60 * 1000;
+}
+
+function julianDayFromUtcMillis(utcMillis) {
+  return utcMillis / 86400000 + 2440587.5;
+}
+
+function getAyanamsaApprox(julianDay) {
+  const centuries = (julianDay - 2451545.0) / 36525;
+  return 23.85675 + 1.396971 * centuries + 0.0003086 * centuries * centuries;
+}
+
+function solveKepler(meanAnomaly, eccentricity) {
+  let eccentricAnomaly = degToRad(meanAnomaly) + eccentricity * Math.sin(degToRad(meanAnomaly)) * (1 + eccentricity * Math.cos(degToRad(meanAnomaly)));
+  for (let index = 0; index < 6; index += 1) {
+    eccentricAnomaly -= (eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - degToRad(meanAnomaly)) / (1 - eccentricity * Math.cos(eccentricAnomaly));
+  }
+  return eccentricAnomaly;
+}
+
+function getOrbitalElements(planet, days) {
+  const data = {
+    Mercury: {
+      N: 48.3313 + 3.24587e-5 * days,
+      i: 7.0047 + 5.00e-8 * days,
+      w: 29.1241 + 1.01444e-5 * days,
+      a: 0.387098,
+      e: 0.205635 + 5.59e-10 * days,
+      M: 168.6562 + 4.0923344368 * days
+    },
+    Venus: {
+      N: 76.6799 + 2.46590e-5 * days,
+      i: 3.3946 + 2.75e-8 * days,
+      w: 54.8910 + 1.38374e-5 * days,
+      a: 0.723330,
+      e: 0.006773 - 1.302e-9 * days,
+      M: 48.0052 + 1.6021302244 * days
+    },
+    Earth: {
+      N: 0,
+      i: 0,
+      w: 282.9404 + 4.70935e-5 * days,
+      a: 1.000000,
+      e: 0.016709 - 1.151e-9 * days,
+      M: 356.0470 + 0.9856002585 * days
+    },
+    Mars: {
+      N: 49.5574 + 2.11081e-5 * days,
+      i: 1.8497 - 1.78e-8 * days,
+      w: 286.5016 + 2.92961e-5 * days,
+      a: 1.523688,
+      e: 0.093405 + 2.516e-9 * days,
+      M: 18.6021 + 0.5240207766 * days
+    },
+    Jupiter: {
+      N: 100.4542 + 2.76854e-5 * days,
+      i: 1.3030 - 1.557e-7 * days,
+      w: 273.8777 + 1.64505e-5 * days,
+      a: 5.20256,
+      e: 0.048498 + 4.469e-9 * days,
+      M: 19.8950 + 0.0830853001 * days
+    },
+    Saturn: {
+      N: 113.6634 + 2.38980e-5 * days,
+      i: 2.4886 - 1.081e-7 * days,
+      w: 339.3939 + 2.97661e-5 * days,
+      a: 9.55475,
+      e: 0.055546 - 9.499e-9 * days,
+      M: 316.9670 + 0.0334442282 * days
+    }
+  };
+  return data[planet];
+}
+
+function heliocentricPosition(planet, days) {
+  const elementsData = getOrbitalElements(planet, days);
+  const eccentricAnomaly = solveKepler(rev(elementsData.M), elementsData.e);
+  const xv = elementsData.a * (Math.cos(eccentricAnomaly) - elementsData.e);
+  const yv = elementsData.a * Math.sqrt(1 - elementsData.e * elementsData.e) * Math.sin(eccentricAnomaly);
+  const trueAnomaly = radToDeg(Math.atan2(yv, xv));
+  const radius = Math.sqrt(xv * xv + yv * yv);
+  const node = elementsData.N;
+  const inclination = elementsData.i;
+  const perihelion = elementsData.w;
+  return {
+    x: radius * (cosDeg(node) * cosDeg(trueAnomaly + perihelion) - sinDeg(node) * sinDeg(trueAnomaly + perihelion) * cosDeg(inclination)),
+    y: radius * (sinDeg(node) * cosDeg(trueAnomaly + perihelion) + cosDeg(node) * sinDeg(trueAnomaly + perihelion) * cosDeg(inclination)),
+    z: radius * sinDeg(trueAnomaly + perihelion) * sinDeg(inclination)
+  };
+}
+
+function calculateMoonTropicalLongitude(julianDay) {
+  const centuries = (julianDay - 2451545.0) / 36525;
+  const meanLongitude = rev(218.3164477 + 481267.88123421 * centuries);
+  const elongation = rev(297.8501921 + 445267.1114034 * centuries);
+  const sunAnomaly = rev(357.5291092 + 35999.0502909 * centuries);
+  const moonAnomaly = rev(134.9633964 + 477198.8675055 * centuries);
+  return rev(
+    meanLongitude
+    + 6.289 * sinDeg(moonAnomaly)
+    + 1.274 * sinDeg(2 * elongation - moonAnomaly)
+    + 0.658 * sinDeg(2 * elongation)
+    + 0.214 * sinDeg(2 * moonAnomaly)
+    - 0.186 * sinDeg(sunAnomaly)
+    - 0.059 * sinDeg(2 * elongation - 2 * moonAnomaly)
+  );
+}
+
+function calculateTropicalLongitude(planet, julianDay) {
+  const days = julianDay - 2451543.5;
+  if (planet === "Moon") return calculateMoonTropicalLongitude(julianDay);
+  if (planet === "Rahu") return rev(125.04452 - 0.0529538083 * days);
+  if (planet === "Ketu") return rev(calculateTropicalLongitude("Rahu", julianDay) + 180);
+  const earth = heliocentricPosition("Earth", days);
+  if (planet === "Sun") return rev(radToDeg(Math.atan2(-earth.y, -earth.x)));
+  const body = heliocentricPosition(planet, days);
+  return rev(radToDeg(Math.atan2(body.y - earth.y, body.x - earth.x)));
+}
+
+function calculateAscendantLongitude(julianDay, longitude, latitude) {
+  const centuries = (julianDay - 2451545.0) / 36525;
+  const siderealTime = rev(280.46061837 + 360.98564736629 * (julianDay - 2451545.0) + 0.000387933 * centuries * centuries - centuries * centuries * centuries / 38710000 + longitude);
+  const obliquity = 23.439291 - 0.0130042 * centuries;
+  const ascendant = rev(radToDeg(Math.atan2(
+    -cosDeg(siderealTime),
+    sinDeg(siderealTime) * cosDeg(obliquity) + tanDeg(latitude) * sinDeg(obliquity)
+  )));
+  return Number.isFinite(ascendant) ? ascendant : rev(siderealTime + 90);
+}
+
+function getVedicSignInfo(longitude) {
+  const normalized = rev(longitude);
+  const signIndex = Math.floor(normalized / 30);
+  const degree = normalized - signIndex * 30;
+  const nakshatraSize = 360 / 27;
+  const padaSize = 360 / 108;
+  const nakshatraIndex = Math.min(26, Math.floor(normalized / nakshatraSize));
+  const pada = Math.floor((normalized - nakshatraIndex * nakshatraSize) / padaSize) + 1;
+  return {
+    signIndex,
+    sign: vedicSigns[signIndex],
+    degree,
+    nakshatraIndex,
+    nakshatra: vedicNakshatras[nakshatraIndex],
+    nakshatraLord: vedicNakshatraLords[nakshatraIndex],
+    pada
+  };
+}
+
+function getNavamshaSign(signIndex, degree) {
+  const padaInSign = Math.min(8, Math.floor(degree / (30 / 9)));
+  const start = signIndex % 3 === 0 ? signIndex : signIndex % 3 === 1 ? mod(signIndex + 8, 12) : mod(signIndex + 4, 12);
+  return mod(start + padaInSign, 12);
+}
+
+function formatVedicDegree(planet) {
+  return `${vedicSigns[planet.signIndex].zh} ${planet.degree.toFixed(1)}°`;
+}
+
+function getPlanetZh(planetId) {
+  return vedicPlanets.find(planet => planet.id === planetId)?.zh || planetId;
+}
+
+function getVedicPlanet(chart, planetId) {
+  return chart.planets.find(planet => planet.id === planetId);
+}
+
+function calculateHouse(signIndex, lagnaSignIndex) {
+  return mod(signIndex - lagnaSignIndex, 12) + 1;
+}
+
+function getVedicDignity(planetId, signIndex) {
+  const dignity = vedicDignities[planetId];
+  if (!dignity) return { label: "节点", tone: "非传统尊贵度", weight: 0 };
+  if (dignity.exalted === signIndex) return { label: "Exalted", tone: "擢升，力量容易被看见", weight: 2 };
+  if (dignity.debilitated === signIndex) return { label: "Debilitated", tone: "落陷，需要现实训练", weight: -2 };
+  if (dignity.own.includes(signIndex)) return { label: "Own Sign", tone: "入庙/守护星座，表达稳定", weight: 1.5 };
+  return { label: "Neutral", tone: "常态发挥，需看宫位与相位", weight: 0 };
+}
+
+function calculateHouseLords(lagnaSignIndex) {
+  return Array.from({ length: 12 }, (_, index) => {
+    const signIndex = mod(lagnaSignIndex + index, 12);
+    return { house: index + 1, signIndex, lord: vedicSignLords[signIndex] };
+  });
+}
+
+function calculateCharaKarakas(planetEntries) {
+  const karakaPlanets = planetEntries
+    .filter(planet => ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"].includes(planet.id))
+    .map(planet => ({ ...planet, degreeInSign: planet.degree }))
+    .sort((left, right) => right.degreeInSign - left.degreeInSign);
+  return Object.fromEntries(karakaPlanets.map((planet, index) => [vedicKarakaOrder[index], planet.id]));
+}
+
+function calculateVimshottariPreview(moonLongitude, birthUtcMillis) {
+  const nakshatraSize = 360 / 27;
+  const nakshatraIndex = Math.floor(rev(moonLongitude) / nakshatraSize);
+  const birthLord = vedicNakshatraLords[nakshatraIndex];
+  const lordIndex = vedicDashaOrder.indexOf(birthLord);
+  const elapsedInNakshatra = (rev(moonLongitude) % nakshatraSize) / nakshatraSize;
+  const firstRemaining = vedicDashaYears[birthLord] * (1 - elapsedInNakshatra);
+  const ageYears = Math.max(0, (Date.now() - birthUtcMillis) / 31556952000);
+  let cursor = 0;
+  let current = { lord: birthLord, startAge: 0, endAge: firstRemaining, length: firstRemaining, sequenceIndex: lordIndex };
+  for (let index = 0; index < 27; index += 1) {
+    const dashaLord = vedicDashaOrder[(lordIndex + index) % vedicDashaOrder.length];
+    const length = index === 0 ? firstRemaining : vedicDashaYears[dashaLord];
+    const end = cursor + length;
+    if (ageYears <= end) {
+      current = { lord: dashaLord, startAge: cursor, endAge: end, length, sequenceIndex: (lordIndex + index) % vedicDashaOrder.length };
+      break;
+    }
+    cursor = end;
+  }
+  const elapsedInCurrent = Math.max(0, ageYears - current.startAge);
+  let antarCursor = 0;
+  let antarLord = current.lord;
+  const antarStart = vedicDashaOrder.indexOf(current.lord);
+  for (let index = 0; index < vedicDashaOrder.length; index += 1) {
+    const lord = vedicDashaOrder[(antarStart + index) % vedicDashaOrder.length];
+    const segment = current.length * vedicDashaYears[lord] / 120;
+    if (elapsedInCurrent <= antarCursor + segment) {
+      antarLord = lord;
+      break;
+    }
+    antarCursor += segment;
+  }
+  return {
+    birthNakshatra: vedicNakshatras[nakshatraIndex],
+    birthLord,
+    firstRemaining,
+    ageYears,
+    mahaLord: current.lord,
+    antarLord,
+    periodLabel: `${getPlanetZh(current.lord)}大限 / ${getPlanetZh(antarLord)}小限`,
+    ageRange: `${current.startAge.toFixed(1)}-${current.endAge.toFixed(1)}岁`
+  };
+}
+
+function calculateVedicChart(birthData, meta) {
+  const latitude = Number(meta.latitude);
+  const longitude = Number(meta.longitude);
+  const timezone = Number(meta.timezone);
+  if (!birthData.timeKnown) return { unavailable: true, reason: "Vedic 上升点、分盘与合盘需要出生时间；当前为时辰未知。" };
+  if (![latitude, longitude, timezone].every(Number.isFinite)) return { unavailable: true, reason: "请填写出生地经度、纬度与时区，才能生成印占上升点。" };
+  const utcMillis = localBirthToUtcMillis(birthData.year, birthData.month, birthData.day, birthData.hour, birthData.minute, timezone);
+  const julianDay = julianDayFromUtcMillis(utcMillis);
+  const ayanamsa = getAyanamsaApprox(julianDay);
+  const lagnaTropical = calculateAscendantLongitude(julianDay, longitude, latitude);
+  const planetEntries = vedicPlanetIds.map(planetId => {
+    const tropicalLongitude = planetId === "Lagna" ? lagnaTropical : calculateTropicalLongitude(planetId, julianDay);
+    const longitudeSidereal = rev(tropicalLongitude - ayanamsa);
+    const signInfo = getVedicSignInfo(longitudeSidereal);
+    const navamshaSignIndex = getNavamshaSign(signInfo.signIndex, signInfo.degree);
+    return {
+      id: planetId,
+      zh: getPlanetZh(planetId),
+      longitude: longitudeSidereal,
+      tropicalLongitude,
+      signIndex: signInfo.signIndex,
+      sign: signInfo.sign,
+      degree: signInfo.degree,
+      nakshatraIndex: signInfo.nakshatraIndex,
+      nakshatra: signInfo.nakshatra,
+      nakshatraLord: signInfo.nakshatraLord,
+      pada: signInfo.pada,
+      navamshaSignIndex,
+      dignity: getVedicDignity(planetId, signInfo.signIndex)
+    };
+  });
+  const lagna = planetEntries.find(planet => planet.id === "Lagna");
+  planetEntries.forEach(planet => {
+    planet.house = calculateHouse(planet.signIndex, lagna.signIndex);
+  });
+  const houseLords = calculateHouseLords(lagna.signIndex);
+  const karakas = calculateCharaKarakas(planetEntries);
+  const moon = planetEntries.find(planet => planet.id === "Moon");
+  const dasha = calculateVimshottariPreview(moon.longitude, utcMillis);
+  const chart = {
+    birthData,
+    meta: { ...meta, latitude, longitude, timezone },
+    utcMillis,
+    julianDay,
+    ayanamsa,
+    planets: planetEntries,
+    lagna,
+    houseLords,
+    karakas,
+    dasha
+  };
+  chart.yogas = detectVedicYogas(chart);
+  chart.validation = getVedicValidation(chart);
+  return chart;
+}
+
+function getHouseLord(chart, house) {
+  return chart.houseLords.find(item => item.house === house)?.lord || "";
+}
+
+function getHousesOwnedBy(chart, planetId) {
+  return chart.houseLords.filter(item => item.lord === planetId).map(item => item.house);
+}
+
+function getPlanetsInHouse(chart, house, { includeLagna = false } = {}) {
+  return chart.planets.filter(planet => planet.house === house && (includeLagna || planet.id !== "Lagna"));
+}
+
+function getPlanetsInSign(chart, signIndex, { includeLagna = false } = {}) {
+  return chart.planets.filter(planet => planet.signIndex === signIndex && (includeLagna || planet.id !== "Lagna"));
+}
+
+function getKarakaForPlanet(chart, planetId) {
+  const entry = Object.entries(chart.karakas).find(([, id]) => id === planetId);
+  return entry ? entry[0] : "";
+}
+
+function getVedicFunctionalRole(chart, planetId) {
+  if (planetId === "Lagna") return "Core-Driver · 命盘入口";
+  if (planetId === "Rahu" || planetId === "Ketu") return "Karmic Node · 放大/剥离";
+  const houses = getHousesOwnedBy(chart, planetId);
+  const ownsKendra = houses.some(house => [1, 4, 7, 10].includes(house));
+  const ownsTrikona = houses.some(house => [1, 5, 9].includes(house));
+  if (ownsKendra && ownsTrikona) return "Yogakaraka · 角宫/三方联动";
+  if (houses.some(house => [1, 5, 9].includes(house))) return "Core-Driver · 方向与福德";
+  if (houses.some(house => [6, 8, 12].includes(house))) return "Growth-Hacker · 压力转化";
+  if (houses.some(house => [2, 7].includes(house))) return "Trader/Maraka Gate · 契约与价值";
+  if (houses.some(house => [3, 11].includes(house))) return "Network Builder · 输出与圈层";
+  return "Faithful · 支撑性角色";
+}
+
+function getPlanetAspectHouses(planet) {
+  const houses = vedicGrahaDrishti[planet.id] || [7];
+  if (!vedicGrahaDrishti[planet.id] && planet.id !== "Lagna") return houses;
+  if (planet.id === "Lagna") return [];
+  return houses;
+}
+
+function hasWholeSignAspect(sourcePlanet, targetPlanet) {
+  const distance = mod(targetPlanet.house - sourcePlanet.house, 12) + 1;
+  return getPlanetAspectHouses(sourcePlanet).includes(distance);
+}
+
+function detectVedicYogas(chart) {
+  const moon = getVedicPlanet(chart, "Moon");
+  const jupiter = getVedicPlanet(chart, "Jupiter");
+  const mars = getVedicPlanet(chart, "Mars");
+  const saturn = getVedicPlanet(chart, "Saturn");
+  const yogaList = [];
+  const moonToJupiter = mod(jupiter.house - moon.house, 12) + 1;
+  if ([1, 4, 7, 10].includes(moonToJupiter)) {
+    yogaList.push({ title: "Gajakesari Yoga", body: "月亮与木星呈角宫关系，传统视为学习、保护与公众回应的增强线索。" });
+  }
+  const moonToMars = mod(mars.house - moon.house, 12) + 1;
+  if ([1, 7].includes(moonToMars)) {
+    yogaList.push({ title: "Chandra-Mangala", body: "月亮与火星强相连，情绪、行动和资源获取容易互相点燃。" });
+  }
+  ["Mars", "Mercury", "Jupiter", "Venus", "Saturn"].forEach(planetId => {
+    const planet = getVedicPlanet(chart, planetId);
+    if ([1, 4, 7, 10].includes(planet.house) && planet.dignity.weight > 0) {
+      yogaList.push({ title: "Pancha Mahapurusha 线索", body: `${planet.zh}在角宫且尊贵度较强，可作为人格/职业能力的支柱之一。` });
+    }
+  });
+  if ([6, 8, 12].includes(saturn.house) && saturn.dignity.weight >= 0) {
+    yogaList.push({ title: "Viparita 线索", body: "土星落压力宫但不弱，困难议题可能通过长期纪律转为能力。" });
+  }
+  return yogaList.length ? yogaList.slice(0, 5) : [{ title: "Yoga 边界", body: "离线预览未抓到强 Yoga；完整判断需结合精确 Shadbala、Dasha 与多分盘。" }];
+}
+
+function getVedicValidation(chart) {
+  const rahu = getVedicPlanet(chart, "Rahu");
+  const ketu = getVedicPlanet(chart, "Ketu");
+  const nodeSeparation = Math.abs(rev(rahu.longitude - ketu.longitude));
+  const nodeDistance = Math.abs(180 - nodeSeparation);
+  return [
+    { label: "行星完整性", value: chart.planets.length === vedicPlanets.length ? "通过" : "待复核", note: "含 Lagna、七曜与 Rahu/Ketu。" },
+    { label: "Rahu/Ketu", value: nodeDistance < 0.5 ? "对冲" : "近似", note: `节点夹角约 ${nodeSeparation.toFixed(1)}°。` },
+    { label: "Ayanamsa", value: `${chart.ayanamsa.toFixed(2)}°`, note: "前端近似 Lahiri，不替代 Swiss Ephemeris。" },
+    { label: "Dasha", value: chart.dasha.periodLabel, note: `出生月宿 ${chart.dasha.birthNakshatra}，当前约 ${chart.dasha.ageRange}。` }
+  ];
+}
+
+function renderVedicStatus(chart) {
+  const lagna = chart.lagna;
+  const moon = getVedicPlanet(chart, "Moon");
+  const dk = chart.karakas.DK;
+  const amk = chart.karakas.AmK;
+  document.querySelector("#vedic-status").innerHTML = [
+    { label: "上升", value: `${lagna.sign.zh} ${lagna.degree.toFixed(1)}°`, note: `${formatLatitude(chart.meta.latitude)} · ${formatLongitude(chart.meta.longitude)}` },
+    { label: "月宿", value: `${moon.nakshatra} p${moon.pada}`, note: `月宿主 ${getPlanetZh(moon.nakshatraLord)}，Dasha 由此起算` },
+    { label: "当前 Dasha", value: chart.dasha.periodLabel, note: chart.dasha.ageRange },
+    { label: "Karaka", value: `AmK ${getPlanetZh(amk)} · DK ${getPlanetZh(dk)}`, note: "7K Chara Karaka 排序预览" }
+  ].map(item => `<div class="vedic-status-item"><small>${item.label}</small><strong>${item.value}</strong><span>${item.note}</span></div>`).join("");
+}
+
+function renderVedicWheel(chart) {
+  const cells = vedicSigns.map((sign, signIndex) => {
+    const planets = getPlanetsInSign(chart, signIndex, { includeLagna: true });
+    const isAsc = chart.lagna.signIndex === signIndex;
+    return `<div class="vedic-sign-cell${isAsc ? " asc" : ""}">
+      <small>${sign.en} · ${sign.mode}</small>
+      <b>${sign.zh}</b>
+      <div class="vedic-sign-planets">
+        ${planets.map(planet => `<span>${planet.id === "Lagna" ? "ASC" : planet.zh}</span>`).join("") || "<span>—</span>"}
+      </div>
+    </div>`;
+  }).join("");
+  document.querySelector("#vedic-chart-wheel").innerHTML = cells;
+}
+
+function renderVedicPlanetTable(chart) {
+  const rows = chart.planets.map(planet => {
+    const karaka = getKarakaForPlanet(chart, planet.id);
+    return `<tr>
+      <td><strong>${planet.zh}</strong><small>${planet.id}${karaka ? ` · ${karaka}` : ""}</small></td>
+      <td>${formatVedicDegree(planet)}<small>${planet.sign.en}</small></td>
+      <td>第${planet.house}宫<small>${planet.id === "Lagna" ? "上升基准" : getVedicFunctionalRole(chart, planet.id)}</small></td>
+      <td>${planet.nakshatra} p${planet.pada}<small>主 ${getPlanetZh(planet.nakshatraLord)}</small></td>
+      <td>D9 ${vedicSigns[planet.navamshaSignIndex].zh}<small>${planet.dignity.label}</small></td>
+    </tr>`;
+  }).join("");
+  document.querySelector("#vedic-planet-table").innerHTML = `<table>
+    <thead><tr><th>星体</th><th>D1 位置</th><th>宫位 / P1</th><th>Nakshatra</th><th>Navamsa / P7</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderVedicSkillGrid() {
+  document.querySelector("#vedic-skill-grid").innerHTML = vedicSkillCoverage.map((skill, index) => `
+    <article class="vedic-skill-item">
+      <small>${String(index + 1).padStart(2, "0")} · ${skill.key}</small>
+      <strong>${skill.title}</strong>
+      <span>${skill.body}</span>
+    </article>
+  `).join("");
+}
+
+function renderVedicAudit(chart) {
+  const auditPlanets = chart.planets.filter(planet => planet.id !== "Lagna");
+  document.querySelector("#vedic-audit-grid").innerHTML = auditPlanets.map(planet => {
+    const owned = getHousesOwnedBy(chart, planet.id);
+    const karaka = getKarakaForPlanet(chart, planet.id);
+    const aspects = getPlanetAspectHouses(planet).map(offset => mod(planet.house + offset - 2, 12) + 1);
+    return `<article class="vedic-audit-item">
+      <small>P1 ${getVedicFunctionalRole(chart, planet.id)}</small>
+      <strong>${planet.zh}${karaka ? ` · ${karaka}` : ""}</strong>
+      <span>P4 宫位：第${planet.house}宫${owned.length ? `，掌 ${owned.join("/")}宫` : ""}。P7 尊贵度：${planet.dignity.label}，${planet.dignity.tone}。P10 相位：${aspects.length ? `照第${aspects.join("/")}宫` : "节点/上升不取常规相位"}。P11 月宿：${planet.nakshatra} p${planet.pada}。</span>
+    </article>`;
+  }).join("");
+}
+
+function renderVedicLove(chart) {
+  const venus = getVedicPlanet(chart, "Venus");
+  const jupiter = getVedicPlanet(chart, "Jupiter");
+  const fifthLord = getHouseLord(chart, 5);
+  const seventhLord = getHouseLord(chart, 7);
+  const pk = chart.karakas.PK;
+  const dk = chart.karakas.DK;
+  const seventhPlanets = getPlanetsInHouse(chart, 7).map(planet => planet.zh).join("、") || "无主要星体";
+  document.querySelector("#vedic-love").innerHTML = `
+    <div class="vedic-topic-item"><small>5宫 / PK</small><strong>${getPlanetZh(fifthLord)} · ${getPlanetZh(pk)}</strong><span>恋爱启动看 5宫主与 PK。5宫主在第${getVedicPlanet(chart, fifthLord)?.house || "—"}宫，PK 为${getPlanetZh(pk)}，提示创造、心动与表达方式。</span></div>
+    <div class="vedic-topic-item"><small>7宫 / DK</small><strong>${getPlanetZh(seventhLord)} · ${getPlanetZh(dk)}</strong><span>长期关系看 7宫主、DK 与 7宫占星。7宫内：${seventhPlanets}；DK 落第${getVedicPlanet(chart, dk)?.house || "—"}宫，像伴侣议题投射的位置。</span></div>
+    <div class="vedic-topic-item"><small>Venus / Jupiter</small><strong>${venus.zh}第${venus.house}宫 · ${jupiter.zh}第${jupiter.house}宫</strong><span>金星看吸引与协商，木星看保护与承诺。此处只给结构线索，真实关系仍看双方选择与沟通。</span></div>`;
+}
+
+function renderVedicCareer(chart) {
+  const tenthLord = getHouseLord(chart, 10);
+  const amk = chart.karakas.AmK;
+  const saturn = getVedicPlanet(chart, "Saturn");
+  const jupiter = getVedicPlanet(chart, "Jupiter");
+  const tenthPlanets = getPlanetsInHouse(chart, 10).map(planet => planet.zh).join("、") || "无主要星体";
+  const tenthLordPlanet = getVedicPlanet(chart, tenthLord);
+  document.querySelector("#vedic-career").innerHTML = `
+    <div class="vedic-topic-item"><small>10宫 / L10</small><strong>${getPlanetZh(tenthLord)} · 第${tenthLordPlanet?.house || "—"}宫</strong><span>事业角色以 10宫主为入口。10宫内：${tenthPlanets}；10主落宫提示职业舞台的现实落点。</span></div>
+    <div class="vedic-topic-item"><small>AmK</small><strong>${getPlanetZh(amk)} · ${vedicKarakaLabels.AmK}</strong><span>AmK 代表执行型才能。${getPlanetZh(amk)}落第${getVedicPlanet(chart, amk)?.house || "—"}宫，适合结合 D10 精盘再细化行业与职位。</span></div>
+    <div class="vedic-topic-item"><small>Saturn / Jupiter</small><strong>土星第${saturn.house}宫 · 木星第${jupiter.house}宫</strong><span>土星看长期训练和组织结构，木星看资源、导师与增长。两者一起决定事业能否沉淀为信用。</span></div>`;
+}
+
+function renderVedicRectifier(chart) {
+  const sensitivity = chart.lagna.degree < 2 || chart.lagna.degree > 28 ? "上升接近换座边界，建议做生时校准。" : "上升未贴近换座边界，但若出生时间有误差仍建议复核。";
+  document.querySelector("#vedic-rectifier").innerHTML = `
+    <div class="vedic-topic-item"><small>出生时间敏感度</small><strong>${sensitivity}</strong><span>Vedic rectifier 建议至少准备 5 个有日期的重大事件，再与 Dasha、宫位和分盘触发交叉核对。</span></div>
+    ${vedicRectifierEvents.map(item => `<div class="vedic-topic-item"><small>${item.houses}</small><strong>${item.event}</strong><span>${item.cue}</span></div>`).join("")}`;
+}
+
+function renderVedicYogas(chart) {
+  const boundary = `<div class="vedic-boundary">边界：本页为浏览器离线近似预览，未调用 Swiss Ephemeris、Shadbala、Ashtakavarga 或完整 divisional charts；专业精盘仍应输出 structured_data.md 后由 Vedic skills 深读。</div>`;
+  document.querySelector("#vedic-chart-note").textContent = `Lahiri 近似 ayanamsa ${chart.ayanamsa.toFixed(2)}° · ${chart.validation[0].value}`;
+  const yogaHtml = chart.yogas.map(yoga => `<div class="vedic-topic-item"><small>Yoga</small><strong>${yoga.title}</strong><span>${yoga.body}</span></div>`).join("");
+  const validationHtml = chart.validation.map(item => `<div class="vedic-topic-item"><small>${item.label}</small><strong>${item.value}</strong><span>${item.note}</span></div>`).join("");
+  return `<div class="synastry-matrix">${validationHtml}${yogaHtml}</div>${boundary}`;
+}
+
+function renderVedicUnavailable(message) {
+  currentVedicChart = null;
+  currentVedicBirthData = null;
+  currentVedicMeta = null;
+  renderVedicSkillGrid();
+  document.querySelector("#vedic-status").innerHTML = `<div class="vedic-status-item"><small>状态</small><strong>暂不可排</strong><span>${message}</span></div>`;
+  document.querySelector("#vedic-chart-note").textContent = "等待完整出生时间、经纬度与时区";
+  const unavailable = `<div class="vedic-unavailable"><strong>印占预览暂不可用</strong><p>${message}</p></div>`;
+  document.querySelector("#vedic-chart-wheel").innerHTML = unavailable;
+  document.querySelector("#vedic-planet-table").innerHTML = "";
+  document.querySelector("#vedic-audit-grid").innerHTML = unavailable;
+  document.querySelector("#vedic-love").innerHTML = unavailable;
+  document.querySelector("#vedic-career").innerHTML = unavailable;
+  document.querySelector("#vedic-rectifier").innerHTML = `
+    <div class="vedic-topic-item"><small>RECTIFIER</small><strong>可先记录五个事件</strong><span>出生时间未知时，先收集升学、职业、关系、搬迁、疾病/手术等有明确年月日的事件，再进入校时。</span></div>
+    ${vedicRectifierEvents.map(item => `<div class="vedic-topic-item"><small>${item.houses}</small><strong>${item.event}</strong><span>${item.cue}</span></div>`).join("")}`;
+  document.querySelector("#vedic-synastry-result").innerHTML = `<div class="vedic-boundary">合盘需要双方都有可用的 Vedic 本命盘。</div>`;
+}
+
+function syncPartnerDefaults(meta, birthData) {
+  const longitude = document.querySelector("#partner-longitude");
+  const latitude = document.querySelector("#partner-latitude");
+  const timezone = document.querySelector("#partner-timezone");
+  const date = document.querySelector("#partner-date");
+  if (!longitude.value && Number.isFinite(meta.longitude)) longitude.value = meta.longitude.toFixed(2);
+  if (!latitude.value && Number.isFinite(meta.latitude)) latitude.value = meta.latitude.toFixed(2);
+  if (!timezone.value && Number.isFinite(meta.timezone)) timezone.value = String(meta.timezone);
+  timezone.value = String(meta.timezone);
+  if (!date.value && birthData?.year) date.value = toIsoDateParts(birthData.year, birthData.month, birthData.day);
+}
+
+function renderVedic(result, birthData, meta) {
+  const chart = calculateVedicChart(birthData, meta);
+  if (chart.unavailable) {
+    renderVedicUnavailable(chart.reason);
+    return;
+  }
+  currentVedicChart = chart;
+  currentVedicBirthData = birthData;
+  currentVedicMeta = meta;
+  renderVedicStatus(chart);
+  renderVedicWheel(chart);
+  renderVedicPlanetTable(chart);
+  renderVedicSkillGrid();
+  renderVedicAudit(chart);
+  renderVedicLove(chart);
+  renderVedicCareer(chart);
+  renderVedicRectifier(chart);
+  document.querySelector("#vedic-synastry-result").innerHTML = renderVedicYogas(chart);
+  syncPartnerDefaults(meta, birthData);
+}
+
+function describeSynastryHouse(house) {
+  const map = {
+    1: "直接触发自我感和身体反应",
+    2: "触发价值、安全感与资源议题",
+    3: "触发沟通、行动和日常互动",
+    4: "触发亲密感、家宅和情绪根基",
+    5: "触发恋爱、创作、玩心与被看见感",
+    6: "触发磨合、责任、压力与服务",
+    7: "触发伴侣镜像、契约与公开关系",
+    8: "触发信任、共享、危机与深层转化",
+    9: "触发信念、远方、学习和人生方向",
+    10: "触发事业、名声、目标与社会角色",
+    11: "触发社群、愿景、收益和朋友圈层",
+    12: "触发退隐、消耗、梦境、远距离与潜意识"
+  };
+  return map[house] || "触发关系主题";
+}
+
+function getMoonCompatibility(leftChart, rightChart) {
+  const leftMoon = getVedicPlanet(leftChart, "Moon");
+  const rightMoon = getVedicPlanet(rightChart, "Moon");
+  const signDistance = mod(rightMoon.signIndex - leftMoon.signIndex, 12) + 1;
+  const nakDistance = mod(rightMoon.nakshatraIndex - leftMoon.nakshatraIndex, 27) + 1;
+  if ([1, 5, 7, 9].includes(signDistance)) return { title: "月亮同步", value: "较顺", body: `月亮呈 ${signDistance} 宫关系，情绪节律较容易互相理解；月宿距离 ${nakDistance}。` };
+  if ([6, 8, 12].includes(signDistance)) return { title: "月亮同步", value: "需调频", body: `月亮呈 ${signDistance} 宫关系，容易在安全感与反应速度上错位；月宿距离 ${nakDistance}。` };
+  return { title: "月亮同步", value: "中性", body: `月亮呈 ${signDistance} 宫关系，重点看日常沟通与 Dasha 是否同步；月宿距离 ${nakDistance}。` };
+}
+
+function getSynastryDirectionSignals(sourceChart, targetChart, sourceName, targetName) {
+  const sourceMoon = getVedicPlanet(sourceChart, "Moon");
+  const sourceVenus = getVedicPlanet(sourceChart, "Venus");
+  const sourceMars = getVedicPlanet(sourceChart, "Mars");
+  const sourceJupiter = getVedicPlanet(sourceChart, "Jupiter");
+  const sourceSaturn = getVedicPlanet(sourceChart, "Saturn");
+  const sourceRahu = getVedicPlanet(sourceChart, "Rahu");
+  const targetMoon = getVedicPlanet(targetChart, "Moon");
+  const targetVenus = getVedicPlanet(targetChart, "Venus");
+  const moonHouse = calculateHouse(sourceMoon.signIndex, targetChart.lagna.signIndex);
+  const venusHouse = calculateHouse(sourceVenus.signIndex, targetChart.lagna.signIndex);
+  const marsHouse = calculateHouse(sourceMars.signIndex, targetChart.lagna.signIndex);
+  const saturnHouse = calculateHouse(sourceSaturn.signIndex, targetChart.lagna.signIndex);
+  const signals = [
+    { label: `${sourceName}月亮落${targetName}第${moonHouse}宫`, text: describeSynastryHouse(moonHouse) },
+    { label: `${sourceName}金星落${targetName}第${venusHouse}宫`, text: describeSynastryHouse(venusHouse) },
+    { label: `${sourceName}火星落${targetName}第${marsHouse}宫`, text: describeSynastryHouse(marsHouse) },
+    { label: `${sourceName}土星落${targetName}第${saturnHouse}宫`, text: describeSynastryHouse(saturnHouse) }
+  ];
+  if (hasWholeSignAspect(sourceJupiter, targetMoon)) {
+    signals.push({ label: `${sourceName}木星照${targetName}月亮`, text: "有保护、鼓励和修复力，但也可能放大期待。" });
+  }
+  if (sourceRahu.signIndex === targetMoon.signIndex || sourceRahu.signIndex === targetVenus.signIndex) {
+    signals.push({ label: `${sourceName}Rahu 触发${targetName}月亮/金星`, text: "吸引力和投射感增强，需要确认现实边界。" });
+  }
+  return signals.slice(0, 6);
+}
+
+function getSynastryMatrix(leftChart, rightChart, relation) {
+  const leftMoon = getVedicPlanet(leftChart, "Moon");
+  const rightMoon = getVedicPlanet(rightChart, "Moon");
+  const leftVenus = getVedicPlanet(leftChart, "Venus");
+  const rightMars = getVedicPlanet(rightChart, "Mars");
+  const leftMercury = getVedicPlanet(leftChart, "Mercury");
+  const rightMercury = getVedicPlanet(rightChart, "Mercury");
+  const moonItem = getMoonCompatibility(leftChart, rightChart);
+  const venusMarsDistance = mod(rightMars.signIndex - leftVenus.signIndex, 12) + 1;
+  const mercuryDistance = mod(rightMercury.signIndex - leftMercury.signIndex, 12) + 1;
+  const relationTone = {
+    romantic: "恋爱合盘优先看吸引、承诺与冲突修复。",
+    business: "合作合盘优先看目标、职责和收益结构。",
+    friendship: "朋友合盘优先看月亮、3宫/11宫和日常支持。",
+    family: "家人合盘优先看月亮、4宫、9宫与责任边界。",
+    general: "通用合盘先看触发模式，再看是否能被现实承载。"
+  }[relation] || "通用合盘先看触发模式，再看是否能被现实承载。";
+  return [
+    moonItem,
+    { title: "吸引/火花", value: [1, 7].includes(venusMarsDistance) ? "强刺激" : [5, 9].includes(venusMarsDistance) ? "流动" : "需经营", body: `金星到火星为 ${venusMarsDistance} 宫关系，显示吸引与行动节奏的配合方式。` },
+    { title: "沟通", value: [1, 5, 9].includes(mercuryDistance) ? "易同步" : [6, 8, 12].includes(mercuryDistance) ? "需翻译" : "中性", body: `双方水星为 ${mercuryDistance} 宫关系，决定误会如何产生、又如何被澄清。` },
+    { title: "责任承载", value: "看土星", body: "土星触发的宫位决定关系里的义务、延迟和长期成本。" },
+    { title: "成长资源", value: "看木星", body: "木星触发处是鼓励、师承、远景和宽容度的来源。" },
+    { title: "关系口径", value: "不打总分", body: relationTone }
+  ];
+}
+
+function renderSynastryResult(leftChart, rightChart, relation, partnerName) {
+  const selfName = currentVedicMeta?.name || "你";
+  const targetName = partnerName || "对方";
+  const matrix = getSynastryMatrix(leftChart, rightChart, relation).map(item => `
+    <article class="vedic-topic-item">
+      <small>${item.title}</small>
+      <strong>${item.value}</strong>
+      <span>${item.body}</span>
+    </article>
+  `).join("");
+  const forward = getSynastryDirectionSignals(leftChart, rightChart, selfName, targetName)
+    .map(item => `<div class="synastry-signal"><b>${item.label}</b>${item.text}</div>`).join("");
+  const backward = getSynastryDirectionSignals(rightChart, leftChart, targetName, selfName)
+    .map(item => `<div class="synastry-signal"><b>${item.label}</b>${item.text}</div>`).join("");
+  document.querySelector("#vedic-synastry-result").innerHTML = `
+    <div class="synastry-matrix">${matrix}</div>
+    <div class="synastry-signal-list">
+      <div class="vedic-boundary">方向铁规：下面分开看 ${selfName}→${targetName} 与 ${targetName}→${selfName}，不混成一个总分。</div>
+      ${forward}
+      ${backward}
+    </div>`;
+}
+
+function renderPartnerSynastry() {
+  const resultRoot = document.querySelector("#vedic-synastry-result");
+  if (!currentVedicChart) {
+    resultRoot.innerHTML = `<div class="vedic-unavailable"><strong>请先生成本命印占盘</strong><p>合盘需要你的 Vedic 本命盘和对方完整出生资料。</p></div>`;
+    return;
+  }
+  const dateValue = document.querySelector("#partner-date").value;
+  const timeValue = document.querySelector("#partner-time").value;
+  const longitude = Number(document.querySelector("#partner-longitude").value);
+  const latitude = Number(document.querySelector("#partner-latitude").value);
+  const timezone = Number(document.querySelector("#partner-timezone").value);
+  if (!dateValue || !timeValue || ![longitude, latitude, timezone].every(Number.isFinite)) {
+    resultRoot.innerHTML = `<div class="vedic-unavailable"><strong>对方资料不完整</strong><p>请填写对方出生日期、时间、经度、纬度与时区。</p></div>`;
+    return;
+  }
+  const [year, month, day] = dateValue.split("-").map(Number);
+  const [hour, minute] = timeValue.split(":").map(Number);
+  const partnerChart = calculateVedicChart({ year, month, day, hour, minute, timeKnown: true }, { longitude, latitude, timezone });
+  if (partnerChart.unavailable) {
+    resultRoot.innerHTML = `<div class="vedic-unavailable"><strong>对方星盘暂不可用</strong><p>${partnerChart.reason}</p></div>`;
+    return;
+  }
+  renderSynastryResult(currentVedicChart, partnerChart, document.querySelector("#partner-relation").value, document.querySelector("#partner-name").value.trim());
 }
 
 function getNameCharacters(name) {
@@ -481,6 +1288,7 @@ function analyzeChart(result) {
   const hiddenWeights = [0.65, 0.25, 0.1];
 
   result.pillars.forEach((pillar, pillarIndex) => {
+    if (pillar.unknown) return;
     weightedElements[stemElements[pillar.stem]] += 1;
     if (pillarIndex !== 2) tenGodScores[getTenGod(result.dayStem, pillar.stem)] += 1;
     const branchHidden = hiddenStems[pillar.branch];
@@ -611,7 +1419,35 @@ function solarTermDay(year, month) {
 
 function dateKey(month, day) { return month * 100 + day; }
 
-function calculateBazi(year, month, day, hour, minute) {
+function toIsoDateParts(year, month, day) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+let chineseCalendarFormatter = null;
+
+function getChineseCalendarFormatter() {
+  chineseCalendarFormatter ||= new Intl.DateTimeFormat("zh-CN-u-ca-chinese", { year: "numeric", month: "long", day: "numeric" });
+  return chineseCalendarFormatter;
+}
+
+function parseLunarMonth(monthText) {
+  const monthMap = { "正月": 1, "二月": 2, "三月": 3, "四月": 4, "五月": 5, "六月": 6, "七月": 7, "八月": 8, "九月": 9, "十月": 10, "十一月": 11, "十二月": 12 };
+  const normalizedMonth = monthText.replace("闰", "");
+  return monthMap[normalizedMonth] || Number.parseInt(normalizedMonth, 10) || null;
+}
+
+function parseLunarDay(dayText) {
+  const index = lunarDayNames.indexOf(dayText);
+  if (index >= 0) return index + 1;
+  return Number.parseInt(dayText, 10) || null;
+}
+
+function getKnownPillars(result) {
+  return result.pillars.filter(pillar => !pillar.unknown);
+}
+
+function calculateBazi(year, month, day, hour, minute, options = {}) {
+  const timeKnown = options.timeKnown !== false && Number.isFinite(hour) && Number.isFinite(minute);
   const liChunDay = solarTermDay(year, 2);
   const beforeLiChun = dateKey(month, day) < dateKey(2, liChunDay);
   const effectiveYear = beforeLiChun ? year - 1 : year;
@@ -638,8 +1474,8 @@ function calculateBazi(year, month, day, hour, minute) {
   const dayIndex = mod(julianDayNumber(year, month, day) + 49, 60);
   const dayStem = dayIndex % 10;
   const dayBranch = dayIndex % 12;
-  const hourBranch = mod(Math.floor((hour + 1) / 2), 12);
-  const hourStem = mod((dayStem % 5) * 2 + hourBranch, 10);
+  const hourBranch = timeKnown ? mod(Math.floor((hour + 1) / 2), 12) : null;
+  const hourStem = timeKnown ? mod((dayStem % 5) * 2 + hourBranch, 10) : null;
 
   const nearTerm = [solarTermDay(year, month)].some(termDay => Math.abs(day - termDay) <= 1);
   return {
@@ -647,12 +1483,14 @@ function calculateBazi(year, month, day, hour, minute) {
       { label: "年柱", stem: yearStem, branch: yearBranch },
       { label: "月柱", stem: monthStem, branch: monthBranch },
       { label: "日柱", stem: dayStem, branch: dayBranch },
-      { label: "时柱", stem: hourStem, branch: hourBranch }
+      timeKnown ? { label: "时柱", stem: hourStem, branch: hourBranch } : { label: "时柱", unknown: true }
     ],
     dayStem,
+    dayIndex,
     hourBranch,
+    timeKnown,
     nearTerm,
-    adjustedTime: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+    adjustedTime: timeKnown ? `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}` : "未知"
   };
 }
 
@@ -671,47 +1509,86 @@ function applySolarCorrection(date, time, longitude, timezone) {
 function getLunarDate(year, month, day) {
   try {
     const date = new Date(year, month - 1, day, 12);
-    const formatter = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", { year: "numeric", month: "long", day: "numeric" });
-    const parts = formatter.formatToParts(date);
+    const parts = getChineseCalendarFormatter().formatToParts(date);
     const monthText = parts.find(part => part.type === "month")?.value || "";
     const dayText = parts.find(part => part.type === "day")?.value || "";
-    const relatedYear = parts.find(part => part.type === "relatedYear")?.value || year;
-    const monthMap = { "正月": 1, "二月": 2, "三月": 3, "四月": 4, "五月": 5, "六月": 6, "七月": 7, "八月": 8, "九月": 9, "十月": 10, "十一月": 11, "十二月": 12 };
-    const normalizedMonth = monthText.replace("闰", "");
-    const lunarMonth = monthMap[normalizedMonth] || Number.parseInt(normalizedMonth, 10) || month;
-    return { month: lunarMonth, label: `${relatedYear}年${monthText}${dayText}日`, isLeap: monthText.includes("闰") };
+    const relatedYear = Number(parts.find(part => part.type === "relatedYear")?.value) || year;
+    const lunarMonth = parseLunarMonth(monthText) || month;
+    const lunarDay = parseLunarDay(dayText) || day;
+    return {
+      year: relatedYear,
+      month: lunarMonth,
+      day: lunarDay,
+      monthText,
+      dayText,
+      label: `${relatedYear}年${monthText}${dayText}日`,
+      isLeap: monthText.includes("闰")
+    };
   } catch {
-    return { month, label: "当前浏览器不支持农历转换", isLeap: false };
+    return { year, month, day, monthText: "", dayText: "", label: "当前浏览器不支持农历转换", isLeap: false, unsupported: true };
   }
+}
+
+function convertLunarToSolar(lunarYear, lunarMonth, lunarDay, isLeap) {
+  if (!Number.isInteger(lunarYear) || !Number.isInteger(lunarMonth) || !Number.isInteger(lunarDay)) return null;
+  const start = new Date(lunarYear, 0, 1, 12);
+  const end = new Date(lunarYear + 1, 2, 15, 12);
+  for (const cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    const lunar = getLunarDate(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate());
+    if (lunar.unsupported) return { unsupported: true };
+    if (lunar.year === lunarYear && lunar.month === lunarMonth && lunar.day === lunarDay && lunar.isLeap === isLeap) {
+      return {
+        year: cursor.getFullYear(),
+        month: cursor.getMonth() + 1,
+        day: cursor.getDate(),
+        iso: toIsoDateParts(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate()),
+        lunar
+      };
+    }
+  }
+  return null;
 }
 
 function renderPillars(result) {
   const root = document.querySelector("#pillars");
-  root.innerHTML = result.pillars.map((pillar, index) => `
+  root.innerHTML = result.pillars.map((pillar, index) => {
+    if (pillar.unknown) {
+      return `<div class="pillar unknown">
+        <small>${pillar.label}</small>
+        <strong>?</strong>
+        <strong>未知</strong>
+        <em>时辰未填</em>
+        <span class="god-label">时柱、时支与相关十神暂不判断</span>
+      </div>`;
+    }
+    return `
     <div class="pillar">
       <small>${pillar.label}</small>
       <strong style="color:${elementColors[stemElements[pillar.stem]]}">${stems[pillar.stem]}</strong>
       <strong style="color:${elementColors[branchElements[pillar.branch]]}">${branches[pillar.branch]}</strong>
       <em>${stemYinYang[pillar.stem]}${stemElements[pillar.stem]}·${branchAnimals[pillar.branch]}</em>
       <span class="god-label">${index === 2 ? "日主" : getTenGod(result.dayStem, pillar.stem)}·藏${hiddenStems[pillar.branch].map(stem => stems[stem]).join("")}</span>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 function renderElements(result) {
   const counts = Object.fromEntries(elements.map(element => [element, 0]));
-  result.pillars.forEach(pillar => {
+  const knownPillars = getKnownPillars(result);
+  knownPillars.forEach(pillar => {
     counts[stemElements[pillar.stem]] += 1;
     counts[branchElements[pillar.branch]] += 1;
   });
+  const scaleUnit = Math.max(1, knownPillars.length * 2);
   const sorted = [...elements].sort((a, b) => counts[b] - counts[a]);
   const strongest = sorted[0];
   const weakest = [...elements].sort((a, b) => counts[a] - counts[b])[0];
   const dayElement = stemElements[result.dayStem];
   document.querySelector("#element-orbit").innerHTML = `<div class="orbit-core"><strong>${dayElement}</strong><small>日主五行</small></div>`;
   document.querySelector("#element-bars").innerHTML = elements.map(element => `
-    <div class="bar-row"><span>${element}</span><div class="bar"><i style="width:${counts[element] * 12.5}%;background:${elementColors[element]}"></i></div><b>${counts[element]}</b></div>
+    <div class="bar-row"><span>${element}</span><div class="bar"><i style="width:${Math.min(100, counts[element] / scaleUnit * 100)}%;background:${elementColors[element]}"></i></div><b>${counts[element]}</b></div>
   `).join("");
-  document.querySelector("#element-insight").textContent = `表层八字中${strongest}元素较显，${weakest}元素较少。“少”不等于缺乏或疾病；下方深读会进一步计入藏干与月令权重。`;
+  document.querySelector("#element-insight").textContent = `表层八字中${strongest}元素较显，${weakest}元素较少。“少”不等于缺乏或疾病；下方深读会进一步计入藏干与月令权重。${result.timeKnown ? "" : "时辰未知时，统计暂不包含时柱。"}`;
 
   const featured = [dayElement, strongest, weakest].filter((item, index, list) => list.indexOf(item) === index);
   while (featured.length < 3) featured.push(elements.find(item => !featured.includes(item)));
@@ -734,17 +1611,21 @@ function renderChartAnalysis(result, name = "") {
   const dayStemName = `${stems[result.dayStem]}${analysis.dayElement}`;
   const supportPercent = Math.round(analysis.supportRatio * 100);
   const dominantGods = analysis.sortedGods.slice(0, 2).map(([god]) => god);
+  const timeStatus = result.timeKnown
+    ? { title: "时辰状态", value: "已知", note: `时柱按${result.adjustedTime}生成` }
+    : { title: "时辰状态", value: "未知", note: "时柱、紫微命身宫与时盘类结果已降级提示" };
   document.querySelector("#chart-summary").innerHTML = `
     <div class="summary-stat"><small>日主</small><strong>${stemYinYang[result.dayStem]}${dayStemName}</strong><span>${elementCopy[analysis.dayElement].nature}</span></div>
     <div class="summary-stat"><small>简化强弱</small><strong>${analysis.strength}</strong><span>生扶权重约 ${supportPercent}%，已计入月令与藏干</span></div>
     <div class="summary-stat"><small>主要十神</small><strong>${dominantGods.join("·")}</strong><span>${dominantGods.map(god => tenGodCopy[god].brief).join("，")}</span></div>
-    <div class="summary-stat"><small>姓名主气</small><strong>${nameInfluence.summary}</strong><span>${nameAnalysis.hasName ? nameAnalysis.elementTrail : "填写称呼后参与辅助分析"}</span></div>`;
+    <div class="summary-stat"><small>姓名主气</small><strong>${nameInfluence.summary}</strong><span>${nameAnalysis.hasName ? nameAnalysis.elementTrail : "填写称呼后参与辅助分析"}</span></div>
+    <div class="summary-stat"><small>${timeStatus.title}</small><strong>${timeStatus.value}</strong><span>${timeStatus.note}</span></div>`;
   renderLifeDomainSummary(analysis, result);
 
   const monthMainStem = hiddenStems[result.pillars[1].branch][0];
   const godEntries = [
     ["年干", result.pillars[0].stem], ["月干", result.pillars[1].stem],
-    ["时干", result.pillars[3].stem], ["月令本气", monthMainStem]
+    ...(result.timeKnown ? [["时干", result.pillars[3].stem]] : []), ["月令本气", monthMainStem]
   ];
   document.querySelector("#ten-god-grid").innerHTML = godEntries.map(([label, stem]) => {
     const god = getTenGod(result.dayStem, stem);
@@ -764,6 +1645,154 @@ function renderChartAnalysis(result, name = "") {
     <article class="narrative-item"><b>姓名参与·${nameInfluence.summary}</b><p>${nameInfluence.reading}</p></article>
     <article class="narrative-item"><b>平衡方向·${analysis.balanceElements.join("与")}</b><p>${analysis.balanceCopy}这是观察方向，不作为穿衣、起名、投资或治疗依据。</p></article>`;
   return analysis;
+}
+
+function getNaYin(stem, branch) {
+  return naYinPairs[Math.floor(getGanzhiIndex(stem, branch) / 2)] || "—";
+}
+
+function getKongWang(result) {
+  const dayPillar = result.pillars[2];
+  const xunStartBranch = mod(dayPillar.branch - dayPillar.stem, 12);
+  const emptyBranches = [mod(xunStartBranch + 10, 12), mod(xunStartBranch + 11, 12)];
+  return {
+    xun: `甲${branches[xunStartBranch]}旬`,
+    branches: emptyBranches,
+    label: `${branches[emptyBranches[0]]}${branches[emptyBranches[1]]}空`
+  };
+}
+
+function formatHiddenStemDetails(result, branchIndex) {
+  return hiddenStems[branchIndex].map((stem, index) => {
+    const role = index === 0 ? "本气" : index === 1 ? "中气" : "余气";
+    return `${role} ${stems[stem]}${stemElements[stem]} · ${getTenGod(result.dayStem, stem)}`;
+  }).join("<br>");
+}
+
+function getProfessionalRelations(result) {
+  const stemCombines = { "0-5": "甲己合土", "1-6": "乙庚合金", "2-7": "丙辛合水", "3-8": "丁壬合木", "4-9": "戊癸合火" };
+  const stemClashes = { "0-6": "甲庚冲", "1-7": "乙辛冲", "2-8": "丙壬冲", "3-9": "丁癸冲" };
+  const branchCombines = { "0-1": "子丑合", "2-11": "寅亥合", "3-10": "卯戌合", "4-9": "辰酉合", "5-8": "巳申合", "6-7": "午未合" };
+  const branchClashes = { "0-6": "子午冲", "1-7": "丑未冲", "2-8": "寅申冲", "3-9": "卯酉冲", "4-10": "辰戌冲", "5-11": "巳亥冲" };
+  const branchHarms = { "0-7": "子未害", "1-6": "丑午害", "2-5": "寅巳害", "3-4": "卯辰害", "8-11": "申亥害", "9-10": "酉戌害" };
+  const branchPunishments = { "0-3": "子卯刑", "1-10": "丑戌刑", "1-7": "丑未刑", "2-5": "寅巳刑", "5-8": "巳申刑", "7-10": "未戌刑" };
+  const triads = [
+    { members: [8, 0, 4], label: "申子辰三合水" },
+    { members: [11, 3, 7], label: "亥卯未三合木" },
+    { members: [2, 6, 10], label: "寅午戌三合火" },
+    { members: [5, 9, 1], label: "巳酉丑三合金" }
+  ];
+  const known = result.pillars
+    .map((pillar, index) => ({ ...pillar, index, shortLabel: pillarLabels[index].slice(0, 1) }))
+    .filter(pillar => !pillar.unknown);
+  const relations = [];
+
+  for (let leftIndex = 0; leftIndex < known.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < known.length; rightIndex += 1) {
+      const left = known[leftIndex];
+      const right = known[rightIndex];
+      const stemKey = pairKey(left.stem, right.stem);
+      const branchKey = pairKey(left.branch, right.branch);
+      if (stemCombines[stemKey]) relations.push({ type: "天干合", text: `${left.shortLabel}干${stems[left.stem]}与${right.shortLabel}干${stems[right.stem]}见${stemCombines[stemKey]}` });
+      if (stemClashes[stemKey]) relations.push({ type: "天干冲", text: `${left.shortLabel}干${stems[left.stem]}与${right.shortLabel}干${stems[right.stem]}见${stemClashes[stemKey]}` });
+      if (branchCombines[branchKey]) relations.push({ type: "地支合", text: `${left.shortLabel}支${branches[left.branch]}与${right.shortLabel}支${branches[right.branch]}见${branchCombines[branchKey]}` });
+      if (branchClashes[branchKey]) relations.push({ type: "地支冲", text: `${left.shortLabel}支${branches[left.branch]}与${right.shortLabel}支${branches[right.branch]}见${branchClashes[branchKey]}` });
+      if (branchHarms[branchKey]) relations.push({ type: "地支害", text: `${left.shortLabel}支${branches[left.branch]}与${right.shortLabel}支${branches[right.branch]}见${branchHarms[branchKey]}` });
+      if (branchPunishments[branchKey]) relations.push({ type: "地支刑", text: `${left.shortLabel}支${branches[left.branch]}与${right.shortLabel}支${branches[right.branch]}见${branchPunishments[branchKey]}` });
+    }
+  }
+
+  const branchSet = new Set(known.map(pillar => pillar.branch));
+  triads.forEach(triad => {
+    if (triad.members.every(branch => branchSet.has(branch))) {
+      relations.unshift({ type: "三合局", text: `${triad.label}成局，相关五行主题更集中` });
+    } else {
+      const present = triad.members.filter(branch => branchSet.has(branch));
+      if (present.length === 2) relations.push({ type: "半合", text: `${present.map(branch => branches[branch]).join("")}见半合，向${triad.label.slice(-1)}气聚拢` });
+    }
+  });
+
+  const unique = relations.filter((item, index, list) => list.findIndex(candidate => candidate.type === item.type && candidate.text === item.text) === index);
+  return unique.length ? unique.slice(0, 8) : [{ type: "平", text: "前三柱未见明显合冲刑害，可把重点放在日主、月令与十神权重。" }];
+}
+
+function renderProfessionalChart(result, analysis, meta = {}) {
+  const kongWang = getKongWang(result);
+  const supportPercent = Math.round(analysis.supportRatio * 100);
+  const monthBranch = result.pillars[1].branch;
+  const monthMainStem = hiddenStems[monthBranch][0];
+  const rows = result.pillars.map((pillar, index) => {
+    if (pillar.unknown) {
+      return `<tr>
+        <td><strong>${pillar.label}</strong><small>时辰未知</small></td>
+        <td class="unknown-cell">待补</td>
+        <td class="unknown-cell">暂不判断</td>
+        <td class="unknown-cell">时支藏干未知</td>
+        <td class="unknown-cell">—</td>
+        <td class="unknown-cell">—</td>
+      </tr>`;
+    }
+    const pillarName = `${stems[pillar.stem]}${branches[pillar.branch]}`;
+    const stemGod = index === 2 ? "日主" : getTenGod(result.dayStem, pillar.stem);
+    const isEmpty = kongWang.branches.includes(pillar.branch);
+    return `<tr>
+      <td><strong>${pillar.label}</strong><small>${pillarName}</small></td>
+      <td><strong>${pillarName}</strong><small>${stemYinYang[pillar.stem]}${stemElements[pillar.stem]} · ${branchElements[pillar.branch]}支</small></td>
+      <td>${stemGod}<small>天干主星</small></td>
+      <td>${formatHiddenStemDetails(result, pillar.branch)}</td>
+      <td>${getNaYin(pillar.stem, pillar.branch)}<small>${getGanzhiIndex(pillar.stem, pillar.branch) + 1}甲子序</small></td>
+      <td>${isEmpty ? "坐空" : "不空"}<small>${kongWang.label}</small></td>
+    </tr>`;
+  }).join("");
+
+  const relationItems = getProfessionalRelations(result).map(item => `<div class="relationship-item"><b>${item.type}</b>${item.text}</div>`).join("");
+  const detailBlocks = [
+    {
+      label: "历法与校时",
+      value: meta.calendarLabel || "公历输入",
+      note: [meta.lunarLabel, meta.correctionNote].filter(Boolean).join("；") || "采用表单输入的标准时间。"
+    },
+    {
+      label: "月令",
+      value: `${branches[monthBranch]}月 · 本气${stems[monthMainStem]}${stemElements[monthMainStem]}`,
+      note: `月令本气对日主呈${getTenGod(result.dayStem, monthMainStem)}，是强弱估算中权重最高的季节背景。`
+    },
+    {
+      label: "空亡",
+      value: `${kongWang.xun} · ${kongWang.label}`,
+      note: "空亡用于观察某些主题的虚实与延迟感；本页只作结构提示，不作事件定断。"
+    },
+    {
+      label: "强弱与平衡",
+      value: `${analysis.strength} · 生扶约${supportPercent}%`,
+      note: `当前平衡观察方向为${analysis.balanceElements.join("、")}。未知时辰时，比例不含时柱。`
+    },
+    {
+      label: "时柱可信度",
+      value: result.timeKnown ? "完整四柱" : "时柱待补",
+      note: result.timeKnown ? "当前细盘已包含时干、时支、时支藏干与时柱关系。" : "已保留年、月、日三柱；子女、晚年、时盘、命身宫等依赖时辰的内容不展开。"
+    }
+  ].map(item => `<article class="detail-block"><small>${item.label}</small><strong>${item.value}</strong><span>${item.note}</span></article>`).join("");
+
+  document.querySelector("#professional-chart").innerHTML = `
+    <div class="professional-chart-grid">
+      <div class="detail-table">
+        <table>
+          <thead>
+            <tr><th>柱位</th><th>干支</th><th>十神</th><th>藏干</th><th>纳音</th><th>空亡</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <aside class="professional-side">
+        ${detailBlocks}
+        <article class="detail-block">
+          <small>干支关系</small>
+          <strong>合冲刑害速览</strong>
+          <div class="relationship-list">${relationItems}</div>
+        </article>
+      </aside>
+    </div>`;
 }
 
 let fiveToneAudioContext = null;
@@ -905,8 +1934,36 @@ function renderPalaceCard(placement, lifeBranchIndex, bodyBranchIndex) {
   </article>`;
 }
 
+function renderZiweiUnknown(year, month, day) {
+  const lunar = getLunarDate(year, month, day);
+  const palaceGrid = document.querySelector("#palace-grid");
+  palaceGrid.classList.add("unavailable");
+  palaceGrid.innerHTML = `<div class="unavailable-panel">
+    <strong>紫微命身宫待补时辰</strong>
+    <p>紫微十二宫需要出生时辰定位命宫与身宫。当前已保留农历日期显示，但不生成命宫、身宫和十二宫细盘。</p>
+  </div>`;
+  document.querySelector("#lunar-label").textContent = lunar.unsupported ? lunar.label : `农历 ${lunar.label}${lunar.isLeap ? "·闰月" : ""}`;
+  document.querySelector("#life-palace").textContent = "—";
+  document.querySelector("#body-palace").textContent = "—";
+  document.querySelector("#life-branch-note").textContent = "时辰未知";
+  document.querySelector("#body-palace-name").textContent = "待补";
+  document.querySelector("#palace-reading").textContent = "请补充出生时辰后再查看紫微命宫、身宫、三方四正与十二宫逐宫解读。";
+  document.querySelector("#ziwei-keynotes").innerHTML = [
+    { label: "已保留", value: "农历生日", note: lunar.unsupported ? lunar.label : `${lunar.label}${lunar.isLeap ? "（闰月）" : ""}` },
+    { label: "暂不展开", value: "命宫 / 身宫", note: "两者均依赖时辰，未知时辰时不做替代判断。" },
+    { label: "建议", value: "先查出生证明", note: "若只知道大致时段，可回到表单填入接近的时辰，再对照可信度阅读。" }
+  ].map(item => `<article><small>${item.label}</small><strong>${item.value}</strong><p>${item.note}</p></article>`).join("");
+  document.querySelector("#palace-interpretations").innerHTML = `<article class="palace-reading-card">
+    <div class="palace-card-head"><small>UNKNOWN HOUR</small><h4>十二宫暂缓<span>时辰依赖</span></h4></div>
+    <p>在未知时辰下强行排十二宫，容易把不确定信息包装成确定结论。本页因此只保留边界说明。</p>
+    <div class="palace-axis"><b>边界</b>不生成命宫、身宫、三方四正、十二宫落支</div>
+    <em>补充时辰后可重新生成完整紫微基础盘。</em>
+  </article>`;
+}
+
 function renderZiwei(year, month, day, hourBranch) {
   const lunar = getLunarDate(year, month, day);
+  document.querySelector("#palace-grid").classList.remove("unavailable");
   const lifeBranchIndex = mod(2 + lunar.month - 1 - hourBranch, 12);
   const bodyBranchIndex = mod(2 + lunar.month - 1 + hourBranch, 12);
   const branchToPalace = {};
@@ -943,6 +2000,9 @@ function renderZiwei(year, month, day, hourBranch) {
 }
 
 function formatInputTime(birthData) {
+  if (birthData.timeKnown === false || birthData.hour == null || birthData.minute == null) {
+    return `${birthData.year}-${String(birthData.month).padStart(2, "0")}-${String(birthData.day).padStart(2, "0")} 时辰未知`;
+  }
   return `${birthData.year}-${String(birthData.month).padStart(2, "0")}-${String(birthData.day).padStart(2, "0")} ${String(birthData.hour).padStart(2, "0")}:${String(birthData.minute).padStart(2, "0")}`;
 }
 
@@ -1216,6 +2276,7 @@ function getNatalInteractions(result, annualStem, annualBranch) {
   const interactions = [];
 
   result.pillars.forEach((pillar, index) => {
+    if (pillar.unknown) return;
     const stemKey = pairKey(annualStem, pillar.stem);
     const branchKey = pairKey(annualBranch, pillar.branch);
     if (stemCombines[stemKey]) interactions.push({ type: "合", text: `${stemCombines[stemKey]}，与${labels[index]}干形成协同与牵引线索` });
@@ -1230,7 +2291,7 @@ function getNatalInteractions(result, annualStem, annualBranch) {
     { members: [8, 0, 4], label: "申子辰三合水" }, { members: [11, 3, 7], label: "亥卯未三合木" },
     { members: [2, 6, 10], label: "寅午戌三合火" }, { members: [5, 9, 1], label: "巳酉丑三合金" }
   ];
-  const natalBranches = result.pillars.map(pillar => pillar.branch);
+  const natalBranches = getKnownPillars(result).map(pillar => pillar.branch);
   triads.forEach(triad => {
     if (triad.members.includes(annualBranch) && triad.members.filter(member => member !== annualBranch).every(member => natalBranches.includes(member))) {
       interactions.unshift({ type: "三合", text: `${triad.label}线索齐全，相关五行主题更集中` });
@@ -1267,7 +2328,9 @@ function renderLuck(result, analysis, birthData, gender) {
   const yearStemYang = result.pillars[0].stem % 2 === 0;
   const hasDirectionRule = gender === "male" || gender === "female";
   const forward = hasDirectionRule ? (gender === "male" ? yearStemYang : !yearStemYang) : true;
-  const adjacent = getAdjacentJieDate(birthData.year, birthData.month, birthData.day, birthData.hour, birthData.minute, forward);
+  const luckHour = birthData.timeKnown === false ? 12 : birthData.hour;
+  const luckMinute = birthData.timeKnown === false ? 0 : birthData.minute;
+  const adjacent = getAdjacentJieDate(birthData.year, birthData.month, birthData.day, luckHour, luckMinute, forward);
   const startAge = Math.max(0, Math.abs(adjacent.jie - adjacent.birth) / 86400000 / 3);
   const directionLabel = forward ? "顺排" : "逆排";
   const monthPillar = result.pillars[1];
@@ -1292,8 +2355,8 @@ function renderLuck(result, analysis, birthData, gender) {
   document.querySelector("#luck-direction").textContent = `${stemYinYang[result.pillars[0].stem]}年·${gender === "male" ? "男命" : gender === "female" ? "女命" : "未指定"}·${directionLabel}`;
   document.querySelector("#luck-start-age").textContent = `约 ${formatStartAge(startAge)}`;
   document.querySelector("#luck-method-note").textContent = hasDirectionRule
-    ? `按“阳年男、阴年女顺；阴年男、阳年女逆”排运。`
-    : `未选择性别，当前仅按顺排预览；逆排结果会不同。`;
+    ? `按“阳年男、阴年女顺；阴年男、阳年女逆”排运。${birthData.timeKnown === false ? "时辰未知，起运岁数按当日正午粗略估算。" : ""}`
+    : `未选择性别，当前仅按顺排预览；逆排结果会不同。${birthData.timeKnown === false ? "时辰未知，起运岁数按当日正午粗略估算。" : ""}`;
   document.querySelector("#luck-cycles").innerHTML = cycles.map(cycle => {
     const god = getTenGod(result.dayStem, cycle.stem);
     return `<article class="luck-cycle ${cycle.current ? "current" : ""}">
@@ -1370,6 +2433,56 @@ function renderHealth(elementSummary) {
   document.querySelector("#wellness-list").innerHTML = personalized.map(([title, copy]) => `<div class="wellness-item"><b>${title}</b>${copy}</div>`).join("");
 }
 
+function renderUnavailableHexagramBlock(label) {
+  return `<article class="hexagram-block unavailable">
+    <div><small>${label}</small><strong>待起</strong><span>出生时辰未知</span></div>
+  </article>`;
+}
+
+function renderBirthDivinationUnavailable(birthData) {
+  const timeLabel = formatInputTime(birthData);
+  document.querySelector("#liuyao-cast-status").textContent = `出生资料：${timeLabel}。可点击按钮改用当前时间摇卦。`;
+  document.querySelector("#meihua-cast-status").textContent = `出生资料：${timeLabel}。可点击按钮改用当前时间起卦。`;
+  document.querySelector("#qimen-cast-status").textContent = `出生资料：${timeLabel}。可点击按钮改用当前时间起局。`;
+
+  document.querySelector("#liuyao-seed").textContent = `${timeLabel} · 出生时辰未知`;
+  document.querySelector("#liuyao-original").innerHTML = renderUnavailableHexagramBlock("本卦");
+  document.querySelector("#liuyao-changed").innerHTML = renderUnavailableHexagramBlock("变卦");
+  document.querySelector("#liuyao-lines").innerHTML = `<div class="unavailable-panel"><strong>六爻出生时间卦暂不生成</strong><p>时间模拟摇卦需要明确时分。请使用当前时间按钮，或补充出生时辰后重新生成。</p></div>`;
+  document.querySelector("#liuyao-readings").innerHTML = [
+    { title: "为什么暂停", copy: "出生时辰未知时，世应、动爻和六亲模拟会被时柱牵动，强行生成容易造成误读。" },
+    { title: "可用方式", copy: "若是占问当前处境，请点击“摇一摇”，系统会改用当下时间重新起卦。" },
+    { title: "边界", copy: "六爻真实占断还需要明确问事、月建日辰、旬空、用神等条件。" }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+
+  document.querySelector("#meihua-seed").textContent = `${timeLabel} · 出生时辰未知`;
+  document.querySelector("#meihua-hexagrams").innerHTML = [
+    renderUnavailableHexagramBlock("本卦"),
+    renderUnavailableHexagramBlock("互卦"),
+    renderUnavailableHexagramBlock("变卦")
+  ].join("");
+  document.querySelector("#meihua-body-use").innerHTML = `<div class="unavailable-panel" style="grid-column:1 / -1"><strong>体用待定</strong><p>梅花时间取数需要时支参与，未知时辰时暂不生成体用关系。</p></div>`;
+  document.querySelector("#meihua-relation").textContent = "可点击“照一照”使用当前时间起卦。";
+  document.querySelector("#meihua-readings").innerHTML = [
+    { title: "取数暂停", copy: "年月日时取数中，时支会参与下卦与动爻计算。" },
+    { title: "替代路径", copy: "若是当下问题，可用当前时间、所见外应或随机数另行起卦。" },
+    { title: "阅读建议", copy: "补齐时辰后，再把出生时间卦作为结构展示，不直接当作事件预测。" }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+
+  document.querySelector("#qimen-time").textContent = `${timeLabel} · 出生时辰未知`;
+  document.querySelector("#qimen-core").innerHTML = [
+    { label: "遁局", value: "待定", note: "时辰未知" },
+    { label: "旬首", value: "待定", note: "需时柱定位" },
+    { label: "符使", value: "待定", note: "需明确时盘" }
+  ].map(item => `<div><small>${item.label}</small><strong>${item.value}</strong><span>${item.note}</span></div>`).join("");
+  document.querySelector("#qimen-grid").innerHTML = `<div class="unavailable-panel" style="grid-column:1 / -1"><strong>奇门时盘暂不生成</strong><p>奇门局需要明确起局时刻。可点击“起一局”使用当前时间。</p></div>`;
+  document.querySelector("#qimen-readings").innerHTML = [
+    { title: "时盘依赖", copy: "符使、旬首、九宫飞布都依赖明确时辰。" },
+    { title: "当前起局", copy: "点击按钮后会用当下时间重新生成简化时盘。" },
+    { title: "使用边界", copy: "当前仍是离线文化体验，不用于择日、投资或出行决策。" }
+  ].map(item => `<article class="divination-reading"><b>${item.title}</b><p>${item.copy}</p></article>`).join("");
+}
+
 const divinationCastConfigs = {
   liuyao: {
     statusSelector: "#liuyao-cast-status",
@@ -1401,6 +2514,10 @@ const divinationCastConfigs = {
 };
 
 function renderSingleDivination(kind, divinationData, source) {
+  if (source !== "current" && divinationData.timeKnown === false) {
+    renderBirthDivinationUnavailable(divinationData);
+    return;
+  }
   const config = divinationCastConfigs[kind];
   const result = calculateBazi(divinationData.year, divinationData.month, divinationData.day, divinationData.hour, divinationData.minute);
   const isCurrent = source === "current";
@@ -1409,6 +2526,10 @@ function renderSingleDivination(kind, divinationData, source) {
 }
 
 function renderDivinationSuite(divinationData, source) {
+  if (source !== "current" && divinationData.timeKnown === false) {
+    renderBirthDivinationUnavailable(divinationData);
+    return;
+  }
   Object.keys(divinationCastConfigs).forEach(kind => renderSingleDivination(kind, divinationData, source));
 }
 
@@ -1442,9 +2563,10 @@ function getLocationControls() {
 }
 
 function renderLocationOption(preset, index) {
+  const latitudeText = Number.isFinite(Number(preset.latitude)) ? ` · ${formatLatitude(Number(preset.latitude))}` : "";
   return `<button class="location-option" id="location-option-${index}" type="button" role="option" aria-selected="false" data-location-index="${index}">
     <strong>${escapeHtml(preset.label)}</strong>
-    <small>${formatLongitude(preset.longitude)} · ${formatTimezone(preset.timezone)}</small>
+    <small>${formatLongitude(preset.longitude)}${latitudeText} · ${formatTimezone(preset.timezone)}</small>
   </button>`;
 }
 
@@ -1497,6 +2619,7 @@ function chooseLocationOption(index) {
 function syncLocationPreset({ autoEnable = false } = {}) {
   const locationInput = document.querySelector("#location");
   const longitudeInput = document.querySelector("#longitude");
+  const latitudeInput = document.querySelector("#latitude");
   const timezoneSelect = document.querySelector("#timezone");
   const correctionInput = document.querySelector("#solar-correction");
   const hint = document.querySelector("#form-hint");
@@ -1504,6 +2627,7 @@ function syncLocationPreset({ autoEnable = false } = {}) {
   if (resolution.status !== "match") {
     if (autoEnable && longitudeInput.dataset.autoLocation === "true") {
       longitudeInput.value = "";
+      latitudeInput.value = "";
       correctionInput.checked = false;
     }
     if (autoEnable && locationInput.value.trim()) {
@@ -1521,13 +2645,72 @@ function syncLocationPreset({ autoEnable = false } = {}) {
     longitudeInput.value = preset.longitude.toFixed(2);
     longitudeInput.dataset.autoLocation = "true";
   }
+  const presetLatitude = Number(preset.latitude);
+  const shouldUpdateLatitude = Number.isFinite(presetLatitude) && (autoEnable || latitudeInput.value === "" || latitudeInput.dataset.autoLocation === "true");
+  if (shouldUpdateLatitude) {
+    latitudeInput.value = presetLatitude.toFixed(2);
+    latitudeInput.dataset.autoLocation = "true";
+  }
   timezoneSelect.value = String(preset.timezone);
   if (autoEnable) correctionInput.checked = true;
   if (correctionInput.checked) {
-    hint.textContent = `已匹配${preset.label} · ${formatLongitude(preset.longitude)}，将按平太阳时校正。`;
+    const latitudeText = Number.isFinite(presetLatitude) ? ` · ${formatLatitude(presetLatitude)}` : "";
+    hint.textContent = `已匹配${preset.label} · ${formatLongitude(preset.longitude)}${latitudeText}，将按平太阳时校正。`;
     hint.classList.remove("error");
   }
   return preset;
+}
+
+function populateLunarDateControls() {
+  const monthSelect = document.querySelector("#lunar-month");
+  const daySelect = document.querySelector("#lunar-day");
+  monthSelect.innerHTML = Array.from({ length: 12 }, (_, index) => `<option value="${index + 1}">${index + 1}月</option>`).join("");
+  daySelect.innerHTML = lunarDayNames.map((name, index) => `<option value="${index + 1}">${name}</option>`).join("");
+}
+
+function setLunarFieldsFromSolarDate(dateValue) {
+  if (!dateValue) return;
+  const [year, month, day] = dateValue.split("-").map(Number);
+  const lunar = getLunarDate(year, month, day);
+  if (lunar.unsupported) return;
+  document.querySelector("#lunar-year").value = lunar.year;
+  document.querySelector("#lunar-month").value = String(lunar.month);
+  document.querySelector("#lunar-day").value = String(lunar.day);
+  document.querySelector("#lunar-leap").value = lunar.isLeap ? "yes" : "no";
+}
+
+function syncCalendarMode() {
+  const isLunar = document.querySelector("#calendar-mode").value === "lunar";
+  const solarField = document.querySelector("#solar-date-field");
+  const birthDate = document.querySelector("#birth-date");
+  const lunarControls = [document.querySelector("#lunar-year"), document.querySelector("#lunar-month"), document.querySelector("#lunar-day"), document.querySelector("#lunar-leap")];
+  solarField.hidden = isLunar;
+  document.querySelectorAll(".lunar-date-row").forEach(row => { row.hidden = !isLunar; });
+  birthDate.disabled = isLunar;
+  birthDate.required = !isLunar;
+  lunarControls.forEach(control => { control.disabled = !isLunar; });
+  document.querySelector("#lunar-year").required = isLunar;
+  if (isLunar) {
+    setLunarFieldsFromSolarDate(birthDate.value);
+    document.querySelector("#form-hint").textContent = "农历生日会先在本地换算为公历，再进入四柱排盘。";
+  } else {
+    document.querySelector("#form-hint").textContent = "建议使用出生证明上的准确时间";
+  }
+  document.querySelector("#form-hint").classList.remove("error");
+}
+
+function syncTimeMode() {
+  const unknown = document.querySelector("#time-mode").value === "unknown";
+  const birthTime = document.querySelector("#birth-time");
+  const correctionInput = document.querySelector("#solar-correction");
+  birthTime.disabled = unknown;
+  birthTime.required = !unknown;
+  if (unknown) correctionInput.checked = false;
+  correctionInput.disabled = unknown;
+  document.querySelector("#form-hint").textContent = unknown
+    ? "时辰未知时将只排年、月、日三柱；依赖时柱的模块会显示边界提示。"
+    : "建议使用出生证明上的准确时间";
+  document.querySelector("#form-hint").classList.remove("error");
 }
 
 populateLocationOptions();
@@ -1603,13 +2786,20 @@ document.querySelector("#location").addEventListener("blur", () => {
 document.querySelector("#longitude").addEventListener("input", event => {
   event.currentTarget.dataset.autoLocation = "false";
 });
+document.querySelector("#latitude").addEventListener("input", event => {
+  event.currentTarget.dataset.autoLocation = "false";
+});
 document.querySelector("#solar-correction").addEventListener("change", event => {
   if (event.currentTarget.checked) syncLocationPreset({ autoEnable: true });
 });
+document.querySelector("#calendar-mode").addEventListener("change", syncCalendarMode);
+document.querySelector("#time-mode").addEventListener("change", syncTimeMode);
 
 document.querySelectorAll(".report-nav button").forEach(button => {
   button.addEventListener("click", () => switchTab(button.dataset.target));
 });
+
+document.querySelector("#calculate-synastry").addEventListener("click", renderPartnerSynastry);
 
 document.querySelector("#edit-profile").addEventListener("click", () => {
   document.querySelector("#birth-form").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1633,27 +2823,89 @@ Object.entries(divinationCastConfigs).forEach(([kind, config]) => {
 document.querySelector("#birth-form").addEventListener("submit", event => {
   event.preventDefault();
   const hint = document.querySelector("#form-hint");
-  const dateValue = document.querySelector("#birth-date").value;
+  const calendarMode = document.querySelector("#calendar-mode").value;
+  const timeKnown = document.querySelector("#time-mode").value !== "unknown";
   const timeValue = document.querySelector("#birth-time").value;
-  if (!dateValue || !timeValue) return;
+  let year;
+  let month;
+  let day;
+  let hour = null;
+  let minute = null;
+  let solarIso = "";
+  let calendarLabel = "公历输入";
+  let lunarLabel = "";
 
-  if (dateValue < "1901-01-01" || dateValue > "2099-12-31") {
-    hint.textContent = "当前离线历法支持 1901–2099 年，请调整出生日期。";
-    hint.classList.add("error");
-    return;
-  }
-  if (dateValue > todayIso) {
-    hint.textContent = "出生日期不能晚于今天。";
-    hint.classList.add("error");
-    return;
+  if (calendarMode === "lunar") {
+    const lunarYear = Number(document.querySelector("#lunar-year").value);
+    const lunarMonth = Number(document.querySelector("#lunar-month").value);
+    const lunarDay = Number(document.querySelector("#lunar-day").value);
+    const isLeap = document.querySelector("#lunar-leap").value === "yes";
+    if (!Number.isInteger(lunarYear) || lunarYear < 1901 || lunarYear > 2099) {
+      hint.textContent = "当前离线农历换算支持 1901–2099 年，请调整农历年份。";
+      hint.classList.add("error");
+      document.querySelector("#lunar-year").focus();
+      return;
+    }
+    const converted = convertLunarToSolar(lunarYear, lunarMonth, lunarDay, isLeap);
+    if (converted?.unsupported) {
+      hint.textContent = "当前浏览器不支持内置农历换算，请改用公历生日。";
+      hint.classList.add("error");
+      return;
+    }
+    if (!converted) {
+      hint.textContent = "没有找到对应的农历日期，请检查月份、日期或闰月选择。";
+      hint.classList.add("error");
+      return;
+    }
+    solarIso = converted.iso;
+    if (solarIso < "1901-01-01" || solarIso > "2099-12-31") {
+      hint.textContent = "换算后的公历日期超出当前离线历法范围。";
+      hint.classList.add("error");
+      return;
+    }
+    if (solarIso > todayIso) {
+      hint.textContent = "换算后的公历出生日期不能晚于今天。";
+      hint.classList.add("error");
+      return;
+    }
+    ({ year, month, day } = converted);
+    calendarLabel = `农历 ${lunarYear}年${isLeap ? "闰" : ""}${lunarMonth}月${lunarDayNames[lunarDay - 1]}`;
+    lunarLabel = `换算为公历 ${solarIso}`;
+  } else {
+    const dateValue = document.querySelector("#birth-date").value;
+    if (!dateValue) return;
+    if (dateValue < "1901-01-01" || dateValue > "2099-12-31") {
+      hint.textContent = "当前离线历法支持 1901–2099 年，请调整出生日期。";
+      hint.classList.add("error");
+      return;
+    }
+    if (dateValue > todayIso) {
+      hint.textContent = "出生日期不能晚于今天。";
+      hint.classList.add("error");
+      return;
+    }
+    solarIso = dateValue;
+    [year, month, day] = dateValue.split("-").map(Number);
+    const lunar = getLunarDate(year, month, day);
+    calendarLabel = `公历 ${dateValue}`;
+    lunarLabel = lunar.unsupported ? "" : `农历 ${lunar.label}${lunar.isLeap ? "·闰月" : ""}`;
   }
 
-  let [year, month, day] = dateValue.split("-").map(Number);
-  let [hour, minute] = timeValue.split(":").map(Number);
-  let correctionNote = "标准时间排盘";
+  if (timeKnown) {
+    if (!timeValue) {
+      hint.textContent = "请选择出生时间，或将时辰状态改为“时辰未知”。";
+      hint.classList.add("error");
+      return;
+    }
+    [hour, minute] = timeValue.split(":").map(Number);
+  }
+
+  syncLocationPreset();
+  const standardBirthData = { year, month, day, hour, minute, timeKnown, solarIso };
+  let correctionNote = timeKnown ? "标准时间排盘" : "时辰未知 · 未进行平太阳时校正";
   const correctionInput = document.querySelector("#solar-correction");
   const locationPreset = correctionInput.checked ? syncLocationPreset() : null;
-  if (correctionInput.checked) {
+  if (timeKnown && correctionInput.checked) {
     const longitude = Number(document.querySelector("#longitude").value);
     const timezone = Number(document.querySelector("#timezone").value);
     if (!Number.isFinite(longitude) || document.querySelector("#longitude").value === "") {
@@ -1662,24 +2914,42 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
       document.querySelector("#longitude").focus();
       return;
     }
-    const adjusted = applySolarCorrection(dateValue, timeValue, longitude, timezone);
+    const adjusted = applySolarCorrection(solarIso, timeValue, longitude, timezone);
     ({ year, month, day, hour, minute } = adjusted);
     const locationNote = locationPreset ? `${locationPreset.label} · ` : "";
     correctionNote = `平太阳时 ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} · ${locationNote}${formatLongitude(longitude)} · 校正${adjusted.correctionMinutes >= 0 ? "+" : ""}${adjusted.correctionMinutes}分`;
   }
 
-  hint.textContent = "建议使用出生证明上的准确时间";
+  hint.textContent = timeKnown ? "建议使用出生证明上的准确时间" : "已按时辰未知生成前三柱报告";
   hint.classList.remove("error");
   const name = document.querySelector("#name").value.trim();
-  const result = calculateBazi(year, month, day, hour, minute);
+  const result = calculateBazi(year, month, day, hour, minute, { timeKnown });
   renderPillars(result);
   const elementSummary = renderElements(result);
   const chartAnalysis = renderChartAnalysis(result, name);
+  renderProfessionalChart(result, chartAnalysis, { calendarLabel, lunarLabel, correctionNote });
   renderFiveSenseRecommendations(chartAnalysis);
   const gender = document.querySelector("#gender").value;
-  renderLuck(result, chartAnalysis, { year, month, day, hour, minute }, gender);
-  renderZiwei(year, month, day, result.hourBranch);
-  renderDivinationSuite({ year, month, day, hour, minute }, "birth");
+  const birthData = { year, month, day, hour, minute, timeKnown, solarIso };
+  const vedicMeta = {
+    name,
+    gender,
+    calendarLabel,
+    lunarLabel,
+    correctionNote,
+    location: document.querySelector("#location").value.trim(),
+    longitude: Number(document.querySelector("#longitude").value),
+    latitude: Number(document.querySelector("#latitude").value),
+    timezone: Number(document.querySelector("#timezone").value)
+  };
+  renderVedic(result, standardBirthData, vedicMeta);
+  renderLuck(result, chartAnalysis, birthData, gender);
+  if (timeKnown) {
+    renderZiwei(year, month, day, result.hourBranch);
+  } else {
+    renderZiweiUnknown(year, month, day);
+  }
+  renderDivinationSuite(birthData, "birth");
   renderHealth(elementSummary);
 
   document.querySelector("#report-name").textContent = name || "你";
@@ -1692,5 +2962,12 @@ document.querySelector("#birth-form").addEventListener("submit", event => {
 const today = new Date();
 const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 const defaultYear = Math.max(1901, today.getFullYear() - 30);
+populateLunarDateControls();
 document.querySelector("#birth-date").max = todayIso;
+document.querySelector("#partner-date").max = todayIso;
 document.querySelector("#birth-date").value = `${defaultYear}-06-15`;
+document.querySelector("#lunar-year").value = defaultYear;
+setLunarFieldsFromSolarDate(document.querySelector("#birth-date").value);
+syncCalendarMode();
+syncTimeMode();
+syncLocationPreset();

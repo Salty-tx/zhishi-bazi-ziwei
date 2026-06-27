@@ -21,6 +21,7 @@
       </a>
       <nav class="header-nav" aria-label="主导航">
         <a href="#reading">命理洞察</a>
+        <a href="#vedic-panel">印度占星</a>
         <a href="#divination">易占奇门</a>
         <a href="#health">时辰养生</a>
         <a href="#method">方法与边界</a>
@@ -60,10 +61,52 @@
 
           <div class="field-row">
             <label>
+              <span>出生历法</span>
+              <select id="calendar-mode">
+                <option value="solar">公历</option>
+                <option value="lunar">农历</option>
+              </select>
+            </label>
+            <label id="solar-date-field">
               <span>公历出生日期</span>
               <input id="birth-date" type="date" min="1901-01-01" max="2099-12-31" required />
             </label>
+          </div>
+
+          <div class="field-row lunar-date-row" hidden>
             <label>
+              <span>农历年份</span>
+              <input id="lunar-year" type="number" min="1901" max="2099" inputmode="numeric" />
+            </label>
+            <label>
+              <span>农历月份</span>
+              <select id="lunar-month"></select>
+            </label>
+          </div>
+
+          <div class="field-row lunar-date-row" hidden>
+            <label>
+              <span>农历日期</span>
+              <select id="lunar-day"></select>
+            </label>
+            <label>
+              <span>闰月</span>
+              <select id="lunar-leap">
+                <option value="no">非闰月</option>
+                <option value="yes">闰月</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label>
+              <span>时辰状态</span>
+              <select id="time-mode">
+                <option value="known">已知具体时间</option>
+                <option value="unknown">时辰未知</option>
+              </select>
+            </label>
+            <label id="birth-time-field">
               <span>出生时间</span>
               <input id="birth-time" type="time" value="12:00" required />
             </label>
@@ -96,11 +139,16 @@
                 <input id="longitude" type="number" min="-180" max="180" step="0.01" placeholder="上海 121.47" />
               </label>
               <label>
+                <span>出生地纬度 <small>印度占星上升点</small></span>
+                <input id="latitude" type="number" min="-90" max="90" step="0.01" placeholder="上海 31.23" />
+              </label>
+              <label>
                 <span>时区</span>
                 <select id="timezone">
                   <option value="8">UTC+8 中国标准时间</option>
                   <option value="9">UTC+9</option>
                   <option value="7">UTC+7</option>
+                  <option value="5.5">UTC+5:30 印度标准时间</option>
                   <option value="0">UTC+0</option>
                   <option value="-5">UTC-5</option>
                   <option value="-8">UTC-8</option>
@@ -119,7 +167,7 @@
           </label>
 
           <button class="primary-button" type="submit">
-            <span>生成我的时辰报告</span>
+            <span>生成专业细盘报告</span>
             <b>→</b>
           </button>
           <p class="form-hint" id="form-hint">建议使用出生证明上的准确时间</p>
@@ -128,6 +176,8 @@
 
       <section class="trust-strip">
         <span>传统历法模型</span>
+        <i></i>
+        <span>Vedic 印占预览</span>
         <i></i>
         <span>无宿命化论断</span>
         <i></i>
@@ -149,6 +199,7 @@
 
         <div class="report-nav" role="tablist">
           <button class="active" data-target="bazi-panel" type="button">八字五行</button>
+          <button data-target="vedic-panel" type="button">印度占星</button>
           <button data-target="luck-panel" type="button">大运流年</button>
           <button data-target="ziwei-panel" type="button">紫微十二宫</button>
           <button data-target="liuyao-panel" type="button">六爻纳甲</button>
@@ -178,6 +229,17 @@
               <p class="insight" id="element-insight"></p>
             </article>
           </div>
+
+          <section class="professional-section" aria-labelledby="professional-chart-title">
+            <div class="section-title professional-title">
+              <div>
+                <span>PROFESSIONAL DETAIL</span>
+                <h3 id="professional-chart-title">专业细盘</h3>
+              </div>
+              <p>展开四柱藏干、十神、纳音、空亡与干支关系。未知时辰时，时柱相关内容自动留空。</p>
+            </div>
+            <div id="professional-chart"></div>
+          </section>
 
           <div class="reading-grid" id="element-readings"></div>
 
@@ -220,6 +282,121 @@
               <div class="audio-status" id="audio-status" aria-live="polite">点击“循环播放”开始，未点击停止前会持续播放</div>
               <p class="taste-boundary">五味属于传统对应意象，不建议因命盘而增加酸、苦、甘、辛或咸味摄入；实际饮食仍以均衡和个人健康状况为准。</p>
             </div>
+          </section>
+        </div>
+
+        <div class="report-panel" id="vedic-panel">
+          <section class="vedic-intro">
+            <div>
+              <span class="chapter">VEDIC / JYOTISH</span>
+              <h3>印度占星·印占工作台</h3>
+              <p>参考 Vedic skills 的读盘、排盘、核心审计、恋爱、事业、校时与合盘流程，生成离线前端预览。完整精排仍以 pysweph/JHora/structured_data 为准。</p>
+            </div>
+            <div class="vedic-status-grid" id="vedic-status"></div>
+          </section>
+
+          <div class="vedic-main-grid">
+            <article class="vedic-card">
+              <div class="subheading">
+                <div><span>RASHI D1</span><h3>本命星盘预览</h3></div>
+                <p id="vedic-chart-note">等待出生资料</p>
+              </div>
+              <div class="vedic-chart-wheel" id="vedic-chart-wheel"></div>
+              <div class="vedic-planet-table" id="vedic-planet-table"></div>
+            </article>
+            <aside class="vedic-card">
+              <span class="chapter">SKILL STACK</span>
+              <h3>七项 Vedic Skills 覆盖</h3>
+              <div class="vedic-skill-grid" id="vedic-skill-grid"></div>
+            </aside>
+          </div>
+
+          <section class="vedic-card">
+            <div class="section-title">
+              <div>
+                <span>CORE AUDIT</span>
+                <h3>P1-P12 行星审计速览</h3>
+              </div>
+              <p>按 KN Rao / Parashari 口径拆分角色、尊贵度、宫位、Nakshatra、Dasha 与 Yoga 线索。</p>
+            </div>
+            <div class="vedic-audit-grid" id="vedic-audit-grid"></div>
+          </section>
+
+          <div class="vedic-topic-grid">
+            <article class="vedic-card">
+              <div class="subheading">
+                <div><span>LOVE</span><h3>恋爱与关系代码</h3></div>
+              </div>
+              <div id="vedic-love"></div>
+            </article>
+            <article class="vedic-card">
+              <div class="subheading">
+                <div><span>CAREER</span><h3>事业生态位</h3></div>
+              </div>
+              <div id="vedic-career"></div>
+            </article>
+            <article class="vedic-card">
+              <div class="subheading">
+                <div><span>RECTIFIER</span><h3>生时校准入口</h3></div>
+              </div>
+              <div id="vedic-rectifier"></div>
+            </article>
+          </div>
+
+          <section class="vedic-card vedic-synastry-tool">
+            <div class="section-title">
+              <div>
+                <span>SYNASTRY</span>
+                <h3>合盘快速入口</h3>
+              </div>
+              <p>按 Vedic synastry 的方向铁规，A→B 与 B→A 分开看；月宿只作筛查，不给单一匹配分。</p>
+            </div>
+            <div class="synastry-form">
+              <label>
+                <span>对方称呼</span>
+                <input id="partner-name" type="text" maxlength="20" placeholder="如：对方" />
+              </label>
+              <label>
+                <span>关系类型</span>
+                <select id="partner-relation">
+                  <option value="general">通用深析</option>
+                  <option value="romantic">恋人/婚恋</option>
+                  <option value="business">合作/事业</option>
+                  <option value="friendship">朋友</option>
+                  <option value="family">家人/亲子</option>
+                </select>
+              </label>
+              <label>
+                <span>出生日期</span>
+                <input id="partner-date" type="date" min="1901-01-01" max="2099-12-31" />
+              </label>
+              <label>
+                <span>出生时间</span>
+                <input id="partner-time" type="time" value="12:00" />
+              </label>
+              <label>
+                <span>经度</span>
+                <input id="partner-longitude" type="number" min="-180" max="180" step="0.01" placeholder="121.47" />
+              </label>
+              <label>
+                <span>纬度</span>
+                <input id="partner-latitude" type="number" min="-90" max="90" step="0.01" placeholder="31.23" />
+              </label>
+              <label>
+                <span>时区</span>
+                <select id="partner-timezone">
+                  <option value="8">UTC+8</option>
+                  <option value="9">UTC+9</option>
+                  <option value="7">UTC+7</option>
+                  <option value="5.5">UTC+5:30</option>
+                  <option value="0">UTC+0</option>
+                  <option value="-5">UTC-5</option>
+                  <option value="-8">UTC-8</option>
+                </select>
+              </label>
+              <button class="ghost-button" id="calculate-synastry" type="button">生成合盘指纹</button>
+            </div>
+            <div class="vedic-synastry-result" id="vedic-synastry-result"></div>
           </section>
         </div>
 
