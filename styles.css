@@ -221,6 +221,16 @@ input:focus, select:focus { border-color: rgba(30,91,75,.55); box-shadow: 0 0 0 
 .summary-stat small { color: var(--muted); font-size: 9px; }
 .summary-stat strong { margin: 7px 0 4px; font: 500 21px var(--serif); }
 .summary-stat span { color: var(--muted); font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+.life-summary-section { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+.life-summary-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; }
+.life-summary-heading h4 { margin: 0; font: 500 19px var(--serif); }
+.life-summary-heading p { margin: 0; color: var(--muted); font-size: 10px; text-align: right; }
+.life-summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+.life-summary-card { min-width: 0; padding: 18px 15px; border: 1px solid var(--line); background: rgba(255,255,255,.36); border-bottom: 2px solid var(--jade); }
+.life-summary-card small, .life-summary-card strong { display: block; }
+.life-summary-card small { color: var(--muted); font-size: 9px; }
+.life-summary-card strong { margin-top: 6px; color: var(--red); font: 500 18px var(--serif); overflow-wrap: anywhere; }
+.life-summary-card p { margin: 12px 0 0; color: var(--muted); font-size: 11px; line-height: 1.85; }
 .ten-god-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
 .ten-god-title { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
 .ten-god-title h4 { margin: 0; font: 500 19px var(--serif); }
@@ -574,6 +584,9 @@ footer p { font-size: 10px; }
   .section-title { align-items: flex-start; flex-direction: column; }
   .section-title p { text-align: left; }
   .chart-summary { grid-template-columns: 1fr; }
+  .life-summary-heading { align-items: flex-start; flex-direction: column; }
+  .life-summary-heading p { text-align: left; }
+  .life-summary-grid { grid-template-columns: 1fr; }
   .ten-god-grid { grid-template-columns: 1fr 1fr; }
   .narrative-grid { grid-template-columns: 1fr; }
   .five-senses-heading { align-items: flex-start; flex-direction: column; }

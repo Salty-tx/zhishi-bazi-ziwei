@@ -517,6 +517,82 @@ function analyzeChart(result) {
   return { weightedElements, tenGodScores, sortedGods, dayElement, resourceElement, supportRatio, strength, balanceElements, balanceCopy };
 }
 
+function pickStrongestGod(analysis, gods) {
+  return gods
+    .map(god => [god, analysis.tenGodScores[god] || 0])
+    .sort((left, right) => right[1] - left[1] || gods.indexOf(left[0]) - gods.indexOf(right[0]))[0][0];
+}
+
+function renderLifeDomainSummary(analysis, result) {
+  const balanceCareCopy = {
+    "木": "别一直憋着和硬扛，规律散步、拉伸、晒太阳，会比临时补救更有用。",
+    "火": "最怕透支兴奋感，少熬夜、少连续高刺激，给自己固定的放空时间。",
+    "土": "先把吃饭和作息稳住，三餐、睡眠、运动一乱，状态很容易跟着散。",
+    "金": "适合用秩序感养状态：清爽环境、规律有氧、把边界和节奏说清楚。",
+    "水": "重点是恢复电量，睡眠、饮水、久坐起身，比盲目进补更值得坚持。"
+  };
+  const studyCopy = {
+    "正印": "你更适合系统学习：跟着教材、老师或成熟课程走，先把框架搭起来，再慢慢深入。",
+    "偏印": "你适合带着兴趣和问题学，冷门资料、跨学科联想会点燃你；但要给探索设一个交付日期。",
+    "食神": "你越讲越会，适合用笔记、讲解、作品来巩固。学完马上输出，记得会更牢。",
+    "伤官": "你不适合死记硬背太久，适合带着质疑做题、拆解规则、找更聪明的方法。"
+  };
+  const careerCopy = {
+    "正官": "适合走专业信誉路线：规则清楚、标准明确、能长期累积口碑的位置，会让你更稳。",
+    "七杀": "适合处理难题和压力场：项目推进、竞争环境、快速决策里容易被看见，但别长期硬撑。",
+    "正财": "适合做能持续经营的事：预算、流程、客户维护、稳定交付，越做越有底气。",
+    "偏财": "适合资源整合和机会型工作：客户、市场、合作、流动项目会带来灵感，但要管住节奏和成本。",
+    "食神": "适合把能力做成体验好的产品、内容或服务。稳定输出，比偶尔爆发更能帮你打开局面。",
+    "伤官": "适合改流程、做创意、讲观点、解决低效问题。表达锋利时，先想清楚听众能不能接住。"
+  };
+  const loveCopy = {
+    "正财": "你在关系里会看重真实照顾和稳定兑现，空话不如行动。适合把钱、时间、期待讲明白。",
+    "偏财": "你容易被有趣、松弛、有空间感的人吸引。关系想长久，要把自由感和责任感同时放进来。",
+    "正官": "你会在意对方是否可靠、尊重规则、给出明确态度。太模糊的关系会消耗安全感。",
+    "七杀": "吸引力来得快时，也要慢一点确认边界。强烈不等于适合，稳定回应才更能说明问题。",
+    "比肩": "你需要平等感和个人空间。适合找能并肩成长的人，不适合长期单方面迁就。",
+    "劫财": "关系里容易出现较劲或试探，越喜欢越要把话说开。少猜，多确认，会轻松很多。"
+  };
+  const studyGod = pickStrongestGod(analysis, ["正印", "偏印", "食神", "伤官"]);
+  const careerGod = pickStrongestGod(analysis, ["正官", "七杀", "正财", "偏财", "食神", "伤官"]);
+  const loveGod = pickStrongestGod(analysis, ["正财", "偏财", "正官", "七杀", "比肩", "劫财"]);
+  const primaryBalance = analysis.balanceElements[0];
+  const dayBranchElement = branchElements[result.pillars[2].branch];
+  const dayBranchRelation = getElementRelation(analysis.dayElement, dayBranchElement);
+  const studyTone = ["正印", "偏印"].includes(studyGod) ? "吸收型" : "输出型";
+  const careerTone = ["正官", "七杀"].includes(careerGod) ? "规则型" : ["正财", "偏财"].includes(careerGod) ? "资源型" : "表达型";
+  const loveTone = ["正财", "偏财", "正官", "七杀"].includes(loveGod) ? "承诺议题" : "边界议题";
+
+  const summaries = [
+    {
+      title: "健康",
+      tag: `重点照护·${primaryBalance}`,
+      copy: `你的健康重点不是“缺什么补什么”，而是先把${primaryBalance}这股节律养起来。${balanceCareCopy[primaryBalance]} 日主${analysis.dayElement}对应${elementCopy[analysis.dayElement].organ}的传统意象；如果已经持续不舒服，别靠命盘判断，直接看医生更靠谱。`
+    },
+    {
+      title: "学业",
+      tag: `${studyTone}·${studyGod}`,
+      copy: `${studyCopy[studyGod]} 对你来说，最有效的学习不是熬时间，而是把知识变成看得见的东西：一页复盘、一套错题、一次讲解，都会比“我看过了”更有用。`
+    },
+    {
+      title: "事业",
+      tag: `${careerTone}·${careerGod}`,
+      copy: `${careerCopy[careerGod]} 你的命局显示为${analysis.strength}，所以事业上最值得经营的是“可持续”：别只靠一阵冲劲，要让别人持续看见你的交付、信用和解决问题的能力。`
+    },
+    {
+      title: "爱情",
+      tag: `${loveTone}·${loveGod}`,
+      copy: `${loveCopy[loveGod]} 日支${branches[result.pillars[2].branch]}带出“${dayBranchRelation}”的相处感，提醒你：好的关系不是猜出来的，是靠清楚表达、稳定回应和彼此留空间慢慢养出来的。`
+    }
+  ];
+
+  document.querySelector("#life-summary-grid").innerHTML = summaries.map(item => `
+    <article class="life-summary-card">
+      <div><small>${item.title}</small><strong>${item.tag}</strong></div>
+      <p>${item.copy}</p>
+    </article>`).join("");
+}
+
 function julianDayNumber(year, month, day) {
   const a = Math.floor((14 - month) / 12);
   const y = year + 4800 - a;
@@ -663,6 +739,7 @@ function renderChartAnalysis(result, name = "") {
     <div class="summary-stat"><small>简化强弱</small><strong>${analysis.strength}</strong><span>生扶权重约 ${supportPercent}%，已计入月令与藏干</span></div>
     <div class="summary-stat"><small>主要十神</small><strong>${dominantGods.join("·")}</strong><span>${dominantGods.map(god => tenGodCopy[god].brief).join("，")}</span></div>
     <div class="summary-stat"><small>姓名主气</small><strong>${nameInfluence.summary}</strong><span>${nameAnalysis.hasName ? nameAnalysis.elementTrail : "填写称呼后参与辅助分析"}</span></div>`;
+  renderLifeDomainSummary(analysis, result);
 
   const monthMainStem = hiddenStems[result.pillars[1].branch][0];
   const godEntries = [
